@@ -24,87 +24,49 @@ export default function Leistungen() {
           </div>
 
           {/* Mix & Mastering Section */}
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 md:gap-16 items-start mb-16 md:mb-20">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 md:gap-16 items-start mb-24 md:mb-32 min-h-[70vh]">
             <div className="text-white order-1">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Mixing – Klare Definition, Druck und Transparenz für deinen Sound</h3>
+              <h3 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-left">Mixing – Klare Definition, Druck und Transparenz für deinen Sound</h3>
               <p className="text-base md:text-lg leading-relaxed mb-6">
                 Ein guter Mix bringt deine Musik auf das nächste Level. Ich sorge für klare Definition, ausgewogene Dynamik und den nötigen Punch – ob im Studio oder Live.
               </p>
               <a
                 href="#contact"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
+                className="bg-white hover:bg-gray-100 text-black px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
               >
                 Jetzt anfragen
               </a>
             </div>
-            <div className="bg-zinc-800 p-6 md:p-8 rounded-xl order-2">
-              <h4 className="text-xl md:text-2xl font-bold text-white mb-4">Mix & Mastering</h4>
-              <div className="space-y-3 md:space-y-4 text-gray-300">
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">Klare Definition und Transparenz</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">Ausgewogene Dynamik</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">Professioneller Punch</span>
-                </div>
-              </div>
+            <div className="order-2">
+              <h4 className="text-6xl md:text-8xl font-bold text-white mb-8 text-right">Mix & Mastering</h4>
             </div>
           </div>
 
           {/* Mastering Section */}
-          <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-8 md:gap-16 items-start mb-16 md:mb-20">
-            <div className="bg-zinc-800 p-6 md:p-8 rounded-xl order-1">
-              <h4 className="text-xl md:text-2xl font-bold text-white mb-4">Mastering</h4>
-              <div className="space-y-3 md:space-y-4 text-gray-300">
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">Optimierung für alle Streaming-Plattformen</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">CD und Vinyl Mastering</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">Stimmige Lautheit mit Dynamik-Erhalt</span>
-                </div>
-              </div>
+          <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-8 md:gap-16 items-start mb-24 md:mb-32 min-h-[70vh]">
+            <div className="order-1">
+              <h4 className="text-6xl md:text-8xl font-bold text-white mb-8 text-left">Mastering</h4>
             </div>
             <div className="text-white order-2">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Mastering – Perfekte Balance für jede Plattform und jedes Medium</h3>
-              <p className="text-base md:text-lg leading-relaxed mb-6">
+              <h3 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-right">Mastering – Perfekte Balance für jede Plattform und jedes Medium</h3>
+              <p className="text-base md:text-lg leading-relaxed mb-6 text-right">
                 Der letzte Feinschliff für deinen Sound. Ich optimiere deinen Mix für jede Streaming-Plattform, CD oder Vinyl und sorge für eine stimmige Lautheit und erhalte dabei die Dynamik und Klangtiefe deiner Produktion.
               </p>
-              <a
-                href="#contact"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
-              >
-                Jetzt anfragen
-              </a>
+              <div className="flex justify-end">
+                <a
+                  href="#contact"
+                  className="bg-white hover:bg-gray-100 text-black px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
+                >
+                  Jetzt anfragen
+                </a>
+              </div>
             </div>
           </div>
 
           {/* Musikproduktion Section */}
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 md:gap-16 items-start mb-16 md:mb-20">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 md:gap-16 items-start mb-24 md:mb-32 min-h-[70vh]">
             <div className="text-white order-1">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Du hast einen Song, eine Idee oder einen unfertigen Track – und willst, dass daraus etwas richtig Gutes wird?</h3>
+              <h3 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-left">Du hast einen Song, eine Idee oder einen unfertigen Track – und willst, dass daraus etwas richtig Gutes wird?</h3>
               <p className="text-base md:text-lg leading-relaxed mb-6">
                 Ich begleite dich auf dem Weg von der ersten Skizze bis zur fertigen Produktion.
               </p>
@@ -128,64 +90,24 @@ export default function Leistungen() {
               </div>
               <a
                 href="#contact"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
+                className="bg-white hover:bg-gray-100 text-black px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
               >
                 Jetzt anfragen
               </a>
             </div>
-            <div className="bg-zinc-800 p-6 md:p-8 rounded-xl order-2">
-              <h4 className="text-xl md:text-2xl font-bold text-white mb-4">Musik-produktion</h4>
-              <div className="space-y-3 md:space-y-4 text-gray-300">
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">Arrangement & Sounddesign</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">Musical Direction</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">Natürliche, dynamische Aufnahmen</span>
-                </div>
-              </div>
+            <div className="order-2">
+              <h4 className="text-6xl md:text-8xl font-bold text-white mb-8 text-right">Musik-produktion</h4>
             </div>
           </div>
 
           {/* Live Section */}
-          <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-8 md:gap-16 items-start mb-16 md:mb-20">
-            <div className="bg-zinc-800 p-6 md:p-8 rounded-xl order-1">
-              <h4 className="text-xl md:text-2xl font-bold text-white mb-4">Live</h4>
-              <div className="space-y-3 md:space-y-4 text-gray-300">
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">Monitoring – Sicher auf der Bühne</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">Front of House – Der perfekte Live-Sound</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm md:text-base">Stagetech/Backline</span>
-                </div>
-              </div>
+          <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-8 md:gap-16 items-start mb-24 md:mb-32 min-h-[70vh]">
+            <div className="order-1">
+              <h4 className="text-6xl md:text-8xl font-bold text-white mb-8 text-left">Live</h4>
             </div>
             <div className="text-white order-2">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Ich sorge für einen professionellen Sound auf jeder Bühne – vom Clubgig bis zum Festival</h3>
-              <p className="text-base md:text-lg leading-relaxed mb-6">
+              <h3 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-right">Ich sorge für einen professionellen Sound auf jeder Bühne – vom Clubgig bis zum Festival</h3>
+              <p className="text-base md:text-lg leading-relaxed mb-6 text-right">
                 Als Musiker kenne ich beide Seiten des Mischpults und weiß, worauf es ankommt.
               </p>
               <div className="space-y-4 mb-6">
@@ -214,12 +136,14 @@ export default function Leistungen() {
                   </div>
                 </div>
               </div>
-              <a
-                href="#contact"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
-              >
-                Jetzt anfragen
-              </a>
+              <div className="flex justify-end">
+                <a
+                  href="#contact"
+                  className="bg-white hover:bg-gray-100 text-black px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
+                >
+                  Jetzt anfragen
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -236,7 +160,7 @@ export default function Leistungen() {
           </p>
           <a
             href="#contact"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
+            className="bg-white hover:bg-gray-100 text-black px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
           >
             Jetzt anfragen
           </a>
@@ -254,7 +178,7 @@ export default function Leistungen() {
           </p>
           <a
             href="#contact"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
+            className="bg-white hover:bg-gray-100 text-black px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
           >
             Jetzt anfragen
           </a>
@@ -272,7 +196,7 @@ export default function Leistungen() {
           </p>
           <a
             href="#contact"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
+            className="bg-white hover:bg-gray-100 text-black px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
           >
             Kontakt aufnehmen
           </a>

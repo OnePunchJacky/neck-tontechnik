@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
+import Image from 'next/image';
 
 interface HeroImage {
   src: string;
@@ -65,21 +66,25 @@ export default function Hero({
     const image = images[0];
     return (
       <div className={`relative w-full ${height} overflow-hidden`}>
-        <img
+        <Image
           src={image.src}
           alt={image.alt}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover object-[center_30%]"
+          priority
         />
+        {/* Gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/20"></div>
         {(image.title || image.description) && (
-          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center z-20">
             <div className="text-center text-white px-4">
               {image.title && (
-                <h1 className="text-4xl md:text-6xl font-bold mb-4">
+                <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-2xl">
                   {image.title}
                 </h1>
               )}
               {image.description && (
-                <p className="text-xl md:text-2xl max-w-2xl mx-auto">
+                <p className="text-xl md:text-2xl max-w-2xl mx-auto drop-shadow-2xl">
                   {image.description}
                 </p>
               )}
@@ -108,6 +113,9 @@ export default function Hero({
         </div>
       </div>
 
+      {/* Gradient overlay for better text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/20"></div>
+
       {/* Static text overlay */}
       {(firstImage.title || firstImage.description) && (
         <div className="absolute inset-0 flex items-center justify-center z-20">
@@ -128,7 +136,7 @@ export default function Hero({
                 {ctaButtons.primary && (
                   <a
                     href={ctaButtons.primary.href}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md text-lg font-medium transition-colors duration-200 drop-shadow-lg"
+                    className="bg-white hover:bg-gray-100 text-black px-8 py-3 rounded-md text-lg font-medium transition-colors duration-200 drop-shadow-lg"
                   >
                     {ctaButtons.primary.text}
                   </a>
@@ -136,7 +144,7 @@ export default function Hero({
                 {ctaButtons.secondary && (
                   <a
                     href={ctaButtons.secondary.href}
-                    className="border border-white text-white hover:bg-white hover:text-black px-8 py-3 rounded-md text-lg font-medium transition-colors duration-200 drop-shadow-lg"
+                    className="bg-white hover:bg-gray-100 text-black px-8 py-3 rounded-md text-lg font-medium transition-colors duration-200 drop-shadow-lg"
                   >
                     {ctaButtons.secondary.text}
                   </a>

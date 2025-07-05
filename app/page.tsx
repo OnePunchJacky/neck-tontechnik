@@ -2,28 +2,38 @@ import Hero from "./components/Hero";
 import TestimonialSlider from "./components/TestimonialSlider";
 import ContactForm from "./components/ContactForm";
 import NewsletterForm from "./components/NewsletterForm";
+import LogoCarousel from "./components/LogoCarousel";
 
 export default function Home() {
   // Example images for the Hero component
   const heroImages = [
     {
-      src: "/magdeburg003-scaled.jpg",
+      src: "/images/home/home-hero-1.jpg",
       alt: "Professional audio engineering setup",
       title: "Klang auf den Punkt – Live und im Studio",
       description: "Professionelle Tontechnik-Lösungen für Veranstaltungen, Studios und Installationen"
     },
     {
-      src: "https://picsum.photos/1200/800?random=1",
-      alt: "Live sound engineering",
+      src: "/images/home/home-hero-2.jpg",
+      alt: "2 Sound Engineers photgraphed from the side looking at a mixing desk",
+      title: "Tontechnik",
+      description: "Professionelle Tontechnik-Lösungen für Veranstaltungen, Studios und Installationen"
+    },
+    {
+      src: "/images/home/home-hero-3.jpg",
+      alt: "2 Sound Engineers photgraphed from above looking at a mixing desk",
       title: "Live-Tontechnik",
       description: "Professionelle Beschallung für Ihre Veranstaltung"
     },
-    {
-      src: "https://picsum.photos/1200/800?random=2",
-      alt: "Studio recording setup",
-      title: "Studio & Produktion",
-      description: "Hochwertige Aufnahmen und Produktion in unserem Studio"
-    }
+  ];
+
+  // Logo carousel data
+  const referenceLogos = [
+    { src: "/images/home/references-carousel/01099.png", alt: "01099" },
+    { src: "/images/home/references-carousel/102boyz-1.png", alt: "102 Boyz" },
+    { src: "/images/home/references-carousel/Korn_Logo_grey.png", alt: "Korn" },
+    { src: "/images/home/references-carousel/SKIAGGU_SHADOW.png", alt: "Skiaggu" },
+    { src: "/images/home/references-carousel/red-bull-symphonic-gold (1).png", alt: "Red Bull Symphonic" }
   ];
 
   // Sample testimonials
@@ -56,7 +66,7 @@ export default function Home() {
       {/* Hero Section */}
       <Hero
         images={heroImages}
-        height="h-[80vh]"
+        height="h-screen"
         autoPlay={true}
         autoPlayInterval={6000}
         showNavigation={true}
@@ -68,7 +78,7 @@ export default function Home() {
       />
 
       {/* Services Section */}
-      <main className="flex flex-col items-center justify-center p-8 pb-20 gap-16 sm:p-20">
+      <main className="flex flex-col items-center justify-center p-8 pb-20 gap-16 sm:p-20 min-h-[600px]">
         <div className="text-center w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-5">
             <div className="p-5 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors duration-200">
@@ -147,14 +157,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Full-width background section with original text */}
+      {/* Full-width background section with original text and logo carousel */}
       <div className="relative py-16 overflow-hidden w-full min-h-[700px] flex items-center">
         <div
           className="absolute inset-0 z-0 bg-[url('/magdeburg003-scaled.jpg')] bg-cover bg-center bg-fixed opacity-20"
           aria-hidden="true"
         ></div>
-        <div className="relative z-10 max-w-3xl mx-auto text-center text-white text-xl leading-relaxed px-8">
-          Egal ob fette Liveshows, präzise Studioarbeit oder praxisnahe Workshops – ich bringe Sound auf die nächste Stufe. Mit jahrelanger Erfahrung als Live- und Studiotechniker sorge ich dafür, dass deine Musik genau so klingt, wie sie klingen soll.
+        <div className="relative z-10 w-full">
+          <div className="max-w-3xl mx-auto text-center text-white text-xl leading-relaxed px-8 mb-16">
+            Egal ob fette Liveshows, präzise Studioarbeit oder praxisnahe Workshops – ich bringe Sound auf die nächste Stufe. Mit jahrelanger Erfahrung als Live- und Studiotechniker sorge ich dafür, dass deine Musik genau so klingt, wie sie klingen soll.
+          </div>
+          <div className="max-w-5xl mx-auto px-8">
+            <LogoCarousel logos={referenceLogos} autoplayDelay={2000} />
+          </div>
         </div>
       </div>
 
@@ -167,7 +182,7 @@ export default function Home() {
               <h3 className="text-2xl font-bold text-white mb-2">Gratis Testmaster</h3>
               <p className="text-white mb-8">Probiere einen kurzen Ausschnitt (45 Sek.) deines Tracks — kostenlos.</p>
             </div>
-            <a href="#contact" className="inline-flex items-center bg-white text-zinc-900 font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition mb-2 w-fit">
+            <a href="#contact" className="inline-flex items-center bg-white text-black font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition mb-2 w-fit">
               Jetzt anfragen <span className="ml-2">→</span>
             </a>
           </div>
@@ -177,7 +192,7 @@ export default function Home() {
               <h3 className="text-2xl font-bold text-white mb-2">Mix/Master-Bundle</h3>
               <p className="text-white mb-8">10 % Rabatt auf dein nächstes Mastering-Projekt.</p>
             </div>
-            <a href="#contact" className="inline-flex items-center bg-white text-zinc-900 font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition mb-2 w-fit">
+            <a href="#contact" className="inline-flex items-center bg-white text-black font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition mb-2 w-fit">
               Angebot sichern <span className="ml-2">→</span>
             </a>
           </div>

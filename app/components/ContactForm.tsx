@@ -74,7 +74,7 @@ export default function ContactForm() {
 
         <div>
           <label htmlFor="message" className="block text-sm font-medium text-white mb-2">
-            Nachricht *
+            Kommentar oder Nachricht
           </label>
           <textarea
             id="message"
@@ -93,7 +93,7 @@ export default function ContactForm() {
           disabled={isSubmitting}
           className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors duration-200"
         >
-          {isSubmitting ? 'Wird gesendet...' : 'Nachricht senden'}
+          {isSubmitting ? 'Wird gesendet...' : 'Absenden'}
         </button>
 
         {submitStatus === 'success' && (
