@@ -1,243 +1,394 @@
-export default function Referenzen() {
+'use client';
+
+import { useState, useEffect } from 'react';
+import ContactFooter from '../../components/ContactFooter';
+
+// Type definitions for WordPress live references
+interface WPLiveReference {
+  id: number;
+  title: { rendered: string };
+  content: { rendered: string };
+  date: string;
+  slug: string;
+  categories: number[];
+  acf?: {
+    venue_name?: string;
+    event_date?: string;
+    location?: string;
+    capacity?: number;
+    event_type?: string;
+    equipment_used?: string;
+    featured_image?: number | string;
+    gallery?: number[];
+    client_testimonial?: string;
+    client_name?: string;
+    client_position?: string;
+  };
+  _embedded?: {
+    'wp:term'?: Array<Array<{
+      id: number;
+      name: string;
+      slug: string;
+    }>>;
+    'wp:featuredmedia'?: Array<{
+      id: number;
+      source_url: string;
+      media_details?: {
+        sizes?: {
+          medium?: { source_url: string };
+          large?: { source_url: string };
+          full?: { source_url: string };
+        };
+      };
+    }>;
+  };
+}
+
+interface WPMedia {
+  id: number;
+  source_url: string;
+  media_details?: {
+    sizes?: {
+      medium?: { source_url: string };
+      large?: { source_url: string };
+      full?: { source_url: string };
+    };
+  };
+}
+
+async function getLiveReferences(): Promise<(WPLiveReference & { featuredImage?: WPMedia })[]> {
+  try {
+    // Fetch live references from the custom post type
+    const response = await fetch(
+      `https://staging.neck-tontechnik.com/wp-json/wp/v2/live_reference?per_page=100&_embed`,
+      { next: { revalidate: 3600 } } // Cache for 1 hour
+    );
+    
+    if (!response.ok) {
+      console.error('Failed to fetch live references:', response.status);
+      return [];
+    }
+    
+    const references: WPLiveReference[] = await response.json();
+    
+    // Process featured images
+    const referencesWithImages = await Promise.all(
+      references.map(async (reference) => {
+        let featuredImage = null;
+        
+        // Check for featured image in _embedded
+        if (reference._embedded?.['wp:featuredmedia']?.[0]) {
+          featuredImage = reference._embedded['wp:featuredmedia'][0];
+        }
+        // Check for custom featured image in ACF
+        else if (reference.acf?.featured_image) {
+          const imageId = reference.acf.featured_image;
+          if (typeof imageId === 'number' || (typeof imageId === 'string' && !isNaN(Number(imageId)))) {
+            try {
+              const mediaResponse = await fetch(
+                `https://staging.neck-tontechnik.com/wp-json/wp/v2/media/${imageId}`,
+                { 
+                  next: { revalidate: 3600 },
+                  cache: 'force-cache'
+                }
+              );
+              if (mediaResponse.ok) {
+                featuredImage = await mediaResponse.json();
+              }
+            } catch (error) {
+              console.error(`Error fetching featured image for reference ${reference.id}:`, error);
+            }
+          }
+        }
+        
+        return { ...reference, featuredImage };
+      })
+    );
+    
+    // Sort by event date if available, otherwise by post date (newest first)
+    return referencesWithImages.sort((a, b) => {
+      const dateA = a.acf?.event_date ? new Date(a.acf.event_date) : new Date(a.date);
+      const dateB = b.acf?.event_date ? new Date(b.acf.event_date) : new Date(b.date);
+      return dateB.getTime() - dateA.getTime();
+    });
+  } catch (error) {
+    console.error('Error fetching live references:', error);
+    return [];
+  }
+}
+
+function getCategoryColor(categoryName: string): string {
+  const colorMap: { [key: string]: string } = {
+    'Concert': 'bg-purple-100 text-purple-800',
+    'Corporate': 'bg-blue-100 text-blue-800',
+    'Festival': 'bg-green-100 text-green-800',
+    'Theatre': 'bg-red-100 text-red-800',
+    'Church': 'bg-orange-100 text-orange-800',
+    'Club': 'bg-pink-100 text-pink-800',
+    'Conference': 'bg-indigo-100 text-indigo-800',
+  };
+  return colorMap[categoryName] || 'bg-gray-100 text-gray-800';
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '');
+}
+
+export default function LiveReferencesPage() {
+  const [references, setReferences] = useState<(WPLiveReference & { featuredImage?: WPMedia })[]>([]);
+  const [filteredReferences, setFilteredReferences] = useState<(WPLiveReference & { featuredImage?: WPMedia })[]>([]);
+  const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchReferences() {
+      const data = await getLiveReferences();
+      setReferences(data);
+      setFilteredReferences(data);
+      setLoading(false);
+    }
+    fetchReferences();
+  }, []);
+
+  useEffect(() => {
+    if (activeFilter === 'all') {
+      setFilteredReferences(references);
+    } else {
+      const filtered = references.filter(reference => {
+        const categories = reference._embedded?.['wp:term']?.[0] || [];
+        return categories.some(cat => cat.slug === activeFilter);
+      });
+      setFilteredReferences(filtered);
+    }
+  }, [activeFilter, references]);
+
+  // Get unique categories for filter buttons
+  const getCategories = () => {
+    const categorySet = new Set<string>();
+    references.forEach(reference => {
+      const categories = reference._embedded?.['wp:term']?.[0] || [];
+      categories.forEach(cat => categorySet.add(cat.slug));
+    });
+    return Array.from(categorySet);
+  };
+
+  // Count references per category
+  const getCategoryCount = (categorySlug: string) => {
+    if (categorySlug === 'all') return references.length;
+    return references.filter(reference => {
+      const categories = reference._embedded?.['wp:term']?.[0] || [];
+      return categories.some(cat => cat.slug === categorySlug);
+    }).length;
+  };
+
+  const categories = getCategories();
+  const filterButtons = [
+    { label: 'Alle Events', value: 'all' },
+    ...categories.map(cat => ({
+      label: cat.charAt(0).toUpperCase() + cat.slice(1),
+      value: cat
+    }))
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-zinc-900">
       {/* Hero Section */}
-      <section className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Referenzen
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Erfolgreich umgesetzte Projekte und zufriedene Kunden - ein Überblick über unsere Arbeit
-            </p>
-          </div>
+      <section className="relative py-20 md:py-32 overflow-hidden min-h-[80vh] flex items-center">
+        <div className="absolute inset-0 z-0 bg-[url('/images/live.jpeg')] bg-cover bg-center bg-fixed opacity-20"></div>
+        <div className="relative z-10 max-w-4xl mx-auto text-center px-4 md:px-8">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
+            Live Events & Referenzen
+          </h1>
+          <p className="text-xl md:text-2xl text-white leading-relaxed drop-shadow-2xl mb-8">
+            Erfolgreich umgesetzte Live-Events, Konzerte und Veranstaltungen mit professioneller Tontechnik
+          </p>
         </div>
       </section>
 
-      {/* Featured Projects */}
+      {/* Filter Tabs */}
+      {categories.length > 0 && (
+        <section className="sticky top-0 z-40 bg-zinc-800 border-b border-zinc-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex space-x-8 overflow-x-auto py-4">
+              {filterButtons.map((filter) => (
+                <button
+                  key={filter.value}
+                  onClick={() => setActiveFilter(filter.value)}
+                  className={`font-medium whitespace-nowrap pb-2 border-b-2 transition-colors ${
+                    activeFilter === filter.value
+                      ? 'text-white border-blue-500'
+                      : 'text-gray-400 hover:text-white border-transparent hover:border-gray-400'
+                  }`}
+                >
+                  {filter.label}
+                  <span className="ml-2 text-sm opacity-60">
+                    ({getCategoryCount(filter.value)})
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* References Grid */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-            Ausgewählte Projekte
-          </h2>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            
-            {/* Project 1 */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-64 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                <svg className="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-flex items-center gap-2 text-gray-400">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-              </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  Stadthalle München
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Komplette Beschallungsanlage für die neu renovierte Stadthalle mit 2000 Plätzen. 
-                  Installation eines modernen Line-Array-Systems mit digitaler Signalverarbeitung.
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Line-Array</span>
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">DSP</span>
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">2000 Plätze</span>
-                </div>
-                <p className="text-sm text-gray-500">
-                  <strong>Jahr:</strong> 2023 | <strong>Kategorie:</strong> Veranstaltungsort
-                </p>
+                <span>Lade Live-Referenzen...</span>
               </div>
             </div>
-
-            {/* Project 2 */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-64 bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
-                <svg className="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                </svg>
-              </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  St. Michael Kirche
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Sanierung der Beschallungsanlage in der historischen St. Michael Kirche. 
-                  Integration moderner Technik unter Berücksichtigung des denkmalgeschützten Gebäudes.
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Kirchen-Sound</span>
-                  <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Denkmalschutz</span>
-                  <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">800 Plätze</span>
-                </div>
-                <p className="text-sm text-gray-500">
-                  <strong>Jahr:</strong> 2023 | <strong>Kategorie:</strong> Kirche
-                </p>
-              </div>
-            </div>
-
-            {/* Project 3 */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-64 bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-                <svg className="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  Konferenzzentrum Frankfurt
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Multifunktionale Beschallungsanlage für das neue Konferenzzentrum. 
-                  Flexible Systeme für verschiedene Veranstaltungsformate von 50 bis 500 Teilnehmern.
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">Konferenz</span>
-                  <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">Multifunktional</span>
-                  <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">500 Plätze</span>
-                </div>
-                <p className="text-sm text-gray-500">
-                  <strong>Jahr:</strong> 2022 | <strong>Kategorie:</strong> Konferenzzentrum
-                </p>
-              </div>
-            </div>
-
-            {/* Project 4 */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-64 bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-                <svg className="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-              </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  Jazz Club "Blue Note"
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Komplette Neugestaltung der Beschallungsanlage für den renommierten Jazz Club. 
-                  Optimierung für akustische Instrumente und intime Atmosphäre.
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded">Jazz</span>
-                  <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded">Akustik</span>
-                  <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded">150 Plätze</span>
-                </div>
-                <p className="text-sm text-gray-500">
-                  <strong>Jahr:</strong> 2022 | <strong>Kategorie:</strong> Club
-                </p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="bg-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-            Kundenstimmen
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            
-            {/* Testimonial 1 */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-semibold">MS</span>
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold text-gray-900">Michael Schmidt</h4>
-                  <p className="text-sm text-gray-600">Stadthalle München</p>
-                </div>
-              </div>
-              <p className="text-gray-700 italic">
-                "Neck Tontechnik hat unsere Stadthalle mit einer erstklassigen Beschallungsanlage ausgestattet. 
-                Die Qualität und der Service waren überragend. Sehr empfehlenswert!"
+          ) : filteredReferences.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 text-lg">
+                {activeFilter === 'all' 
+                  ? 'Keine Live-Referenzen gefunden.' 
+                  : `Keine Referenzen in der Kategorie "${filterButtons.find(f => f.value === activeFilter)?.label}" gefunden.`
+                }
               </p>
             </div>
-
-            {/* Testimonial 2 */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 font-semibold">PF</span>
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold text-gray-900">Pfarrer Fischer</h4>
-                  <p className="text-sm text-gray-600">St. Michael Kirche</p>
-                </div>
-              </div>
-              <p className="text-gray-700 italic">
-                "Die Integration der neuen Beschallungsanlage in unser historisches Gebäude war eine Herausforderung, 
-                die Neck Tontechnik meisterhaft gelöst hat. Die Gemeinde ist begeistert."
-              </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredReferences.map((reference) => {
+                const categories = reference._embedded?.['wp:term']?.[0] || [];
+                const eventDate = reference.acf?.event_date ? new Date(reference.acf.event_date) : null;
+                
+                return (
+                  <article
+                    key={reference.id}
+                    className="bg-zinc-800 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 group"
+                  >
+                    {/* Featured Image */}
+                    <div className="relative h-64 bg-zinc-700 overflow-hidden">
+                      {reference.featuredImage?.source_url ? (
+                        <>
+                          <img
+                            src={reference.featuredImage.media_details?.sizes?.large?.source_url || reference.featuredImage.source_url}
+                            alt={reference.title.rendered}
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-700">
+                          {/* Audio/Live icon as fallback */}
+                          <div className="flex items-center justify-center">
+                            <svg className="w-16 h-16 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="p-6">
+                      {/* Categories */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {categories.map((category) => (
+                          <span
+                            key={category.id}
+                            className={`text-xs font-medium px-2.5 py-0.5 rounded ${getCategoryColor(category.name)}`}
+                          >
+                            {category.name}
+                          </span>
+                        ))}
+                      </div>
+                      
+                      {/* Title */}
+                      <h3 className="text-xl font-semibold text-white mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+                        {reference.title.rendered}
+                      </h3>
+                      
+                      {/* Venue & Location */}
+                      {(reference.acf?.venue_name || reference.acf?.location) && (
+                        <div className="text-gray-400 text-sm mb-3">
+                          {reference.acf?.venue_name && (
+                            <div className="font-medium">{reference.acf.venue_name}</div>
+                          )}
+                          {reference.acf?.location && (
+                            <div className="flex items-center gap-1">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                              {reference.acf.location}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* Event Details */}
+                      <div className="flex flex-wrap gap-4 text-xs text-gray-400 mb-4">
+                        {eventDate && (
+                          <div className="flex items-center gap-1">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            {eventDate.toLocaleDateString('de-DE')}
+                          </div>
+                        )}
+                        {reference.acf?.capacity && (
+                          <div className="flex items-center gap-1">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            {reference.acf.capacity} Plätze
+                          </div>
+                        )}
+                        {reference.acf?.event_type && (
+                          <div className="bg-zinc-700 px-2 py-1 rounded">
+                            {reference.acf.event_type}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Description */}
+                      {reference.content.rendered && (
+                        <p className="text-gray-300 text-sm mb-4 line-clamp-3">
+                          {stripHtml(reference.content.rendered)}
+                        </p>
+                      )}
+                      
+                      {/* Equipment Used */}
+                      {reference.acf?.equipment_used && (
+                        <div className="text-xs text-gray-500 border-t border-zinc-700 pt-3">
+                          <strong>Equipment:</strong> {reference.acf.equipment_used}
+                        </div>
+                      )}
+                      
+                      {/* Client Testimonial */}
+                      {reference.acf?.client_testimonial && (
+                        <div className="mt-4 p-3 bg-zinc-700 rounded-lg">
+                          <p className="text-gray-300 text-sm italic mb-2">
+                            "{reference.acf.client_testimonial}"
+                          </p>
+                          {reference.acf?.client_name && (
+                            <div className="text-xs text-gray-400">
+                              — {reference.acf.client_name}
+                              {reference.acf?.client_position && `, ${reference.acf.client_position}`}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
             </div>
-
-            {/* Testimonial 3 */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-600 font-semibold">AW</span>
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold text-gray-900">Anna Weber</h4>
-                  <p className="text-sm text-gray-600">Konferenzzentrum Frankfurt</p>
-                </div>
-              </div>
-              <p className="text-gray-700 italic">
-                "Die flexible Beschallungsanlage ermöglicht uns verschiedene Veranstaltungsformate. 
-                Die Bedienung ist intuitiv und der Support ist immer erreichbar."
-              </p>
-            </div>
-
-          </div>
+          )}
         </div>
       </section>
 
-      {/* Statistics */}
-      <section className="bg-blue-600 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">150+</div>
-              <div className="text-blue-100">Projekte</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">25+</div>
-              <div className="text-blue-100">Jahre Erfahrung</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">98%</div>
-              <div className="text-blue-100">Zufriedene Kunden</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">24/7</div>
-              <div className="text-blue-100">Support</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="bg-gray-900 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Werden Sie Teil unserer Erfolgsgeschichte
-          </h2>
-          <p className="text-xl text-gray-300 mb-8">
-            Lassen Sie uns gemeinsam Ihr nächstes Audio-Projekt verwirklichen
-          </p>
-          <a
-            href="/contact"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md text-lg font-medium transition-colors duration-200"
-          >
-            Projekt anfragen
-          </a>
-        </div>
-      </section>
+      {/* Contact Section */}
+      <ContactFooter />
     </div>
   );
-} 
+}

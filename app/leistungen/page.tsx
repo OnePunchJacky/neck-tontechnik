@@ -1,3 +1,5 @@
+import ContactFooter from '../components/ContactFooter';
+
 export default function Leistungen() {
   return (
     <div className="min-h-screen bg-zinc-900">
@@ -143,22 +145,7 @@ export default function Leistungen() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-12 md:py-20 px-4 md:px-8 bg-zinc-800">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6">
-            Let's get in touch
-          </h2>
-          <p className="text-lg md:text-xl text-gray-300 mb-6 md:mb-8">
-            Bereit für dein nächstes Projekt? Lass uns gemeinsam deine Audio-Vision verwirklichen.
-          </p>
-          <a
-            href="#contact"
-            className="bg-white hover:bg-gray-100 text-black px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-medium transition-colors duration-200 inline-block"
-          >
-            Kontakt aufnehmen
-          </a>
-        </div>
-      </section>
+      <ContactFooter />
     </div>
   );
 } 

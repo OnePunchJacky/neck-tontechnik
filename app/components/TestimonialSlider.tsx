@@ -61,9 +61,12 @@ export default function TestimonialSlider({
         </div>
         <div className="text-white">
           <div className="font-semibold text-lg">{testimonial.author}</div>
-          {testimonial.role && testimonial.company && (
+          {(testimonial.role || testimonial.company) && (
             <div className="text-gray-300 text-sm">
-              {testimonial.role} bei {testimonial.company}
+              {testimonial.role && testimonial.company 
+                ? `${testimonial.role} bei ${testimonial.company}`
+                : testimonial.role || testimonial.company
+              }
             </div>
           )}
         </div>
@@ -83,9 +86,12 @@ export default function TestimonialSlider({
               </div>
               <div className="text-white">
                 <div className="font-semibold text-lg">{testimonial.author}</div>
-                {testimonial.role && testimonial.company && (
+                {(testimonial.role || testimonial.company) && (
                   <div className="text-gray-300 text-sm">
-                    {testimonial.role} bei {testimonial.company}
+                    {testimonial.role && testimonial.company 
+                      ? `${testimonial.role} bei ${testimonial.company}`
+                      : testimonial.role || testimonial.company
+                    }
                   </div>
                 )}
               </div>

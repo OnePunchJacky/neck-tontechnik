@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "create-block/compare-audio-block",
+  "version": "0.1.0",
+  "title": "Compare Audio Block",
+  "category": "widgets",
+  "icon": "media-audio",
+  "description": "Block to display an audio player for comparing samples before and after mastering",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "textdomain": "compare-audio-block",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js"
+}

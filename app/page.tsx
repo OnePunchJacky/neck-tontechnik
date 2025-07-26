@@ -1,8 +1,9 @@
 import Hero from "./components/Hero";
 import TestimonialSlider from "./components/TestimonialSlider";
-import ContactForm from "./components/ContactForm";
+import ContactFooter from "./components/ContactFooter";
 import NewsletterForm from "./components/NewsletterForm";
 import LogoCarousel from "./components/LogoCarousel";
+import testimonialsData from "../data/testimonials.json";
 
 export default function Home() {
   // Example images for the Hero component
@@ -36,30 +37,8 @@ export default function Home() {
     { src: "/images/home/references-carousel/red-bull-symphonic-gold (1).png", alt: "Red Bull Symphonic" }
   ];
 
-  // Sample testimonials
-  const testimonials = [
-    {
-      id: 1,
-      text: "Neck hat unseren Live-Sound auf ein komplett neues Level gebracht. Die Klangqualität war atemberaubend und das Publikum war begeistert.",
-      author: "Max Mustermann",
-      role: "Bandleader",
-      company: "The Rockstars"
-    },
-    {
-      id: 2,
-      text: "Das Mixing und Mastering meines Albums war einfach perfekt. Neck versteht genau, was ein Song braucht, um zu glänzen.",
-      author: "Anna Schmidt",
-      role: "Sängerin",
-      company: "Solo Artist"
-    },
-    {
-      id: 3,
-      text: "Der Workshop war unglaublich lehrreich. Ich habe in einem Tag mehr gelernt als in Monaten des Selbststudiums.",
-      author: "Tom Weber",
-      role: "Aspiring Producer",
-      company: "Home Studio"
-    }
-  ];
+  // Real testimonials from clients
+  const testimonials = testimonialsData;
 
   return (
     <div className="min-h-screen bg-zinc-900">
@@ -112,6 +91,154 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Equipment Rental Section */}
+      <section className="relative py-20 overflow-hidden w-full">
+        <div className="absolute inset-0 z-0 bg-[url('/images/studio-bg.jpg')] bg-cover bg-center bg-fixed opacity-15"></div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+              Equipment Verleih
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Professionelle Tontechnik mieten - von Mikrofonen bis hin zu kompletten Beschallungsanlagen
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            {/* Left Content */}
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-lg mb-2">Mikrofone & Aufnahmetechnik</h3>
+                    <p className="text-gray-300">
+                      Hochwertige Kondensator- und Dynamikmikrofone für Studio und Live-Einsatz
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M9 21V3l6 4v10l-6 4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-lg mb-2">Lautsprecher & Verstärker</h3>
+                    <p className="text-gray-300">
+                      Professionelle PA-Systeme und Verstärker für Events jeder Größe
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-lg mb-2">Mischpulte & Interfaces</h3>
+                    <p className="text-gray-300">
+                      Digitale und analoge Mischpulte sowie Audio-Interfaces für jeden Bedarf
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-zinc-800 rounded-lg p-6">
+                <h4 className="text-white font-semibold text-lg mb-3">Warum Equipment von uns mieten?</h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Professionell gewartetes Equipment</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Flexible Mietzeiten (Tage, Wochen, Monate)</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Technischer Support inklusive</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Delivery & Setup Service verfügbar</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Right Content - CTA */}
+            <div className="text-center lg:text-left">
+              <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-xl p-8 text-white">
+                <div className="mb-6">
+                  <svg className="w-16 h-16 mx-auto lg:mx-0 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13h10M9 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM20.5 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                  </svg>
+                </div>
+                
+                <h3 className="text-2xl font-bold mb-4">
+                  Equipment online mieten
+                </h3>
+                
+                <p className="text-blue-100 mb-6">
+                  Durchstöbern Sie unser komplettes Equipment-Sortiment, wählen Sie Ihre Mietdauer und senden Sie uns direkt eine Anfrage.
+                </p>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center lg:justify-start space-x-2 text-blue-100">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm">Verfügbarkeit in Echtzeit prüfen</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-center lg:justify-start space-x-2 text-blue-100">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm">Automatische Preisberechnung</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-center lg:justify-start space-x-2 text-blue-100">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm">Direkte Anfrage per E-Mail</span>
+                  </div>
+                </div>
+                
+                <div className="mt-8">
+                  <a
+                    href="/equipment-verleih"
+                    className="inline-block bg-white text-blue-700 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-200 shadow-lg"
+                  >
+                    Equipment durchstöbern
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Full-width background section with testimonials */}
       <div className="relative py-16 overflow-hidden w-full min-h-[700px] flex items-center justify-center">
@@ -209,23 +336,7 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="relative py-20 overflow-hidden w-full min-h-[700px] flex items-center">
-        <div
-          className="absolute inset-0 z-0 bg-[url('/images/live.jpeg')] bg-cover bg-center bg-fixed opacity-20"
-          aria-hidden="true"
-        ></div>
-        <div className="relative z-10 w-full px-4 md:px-8">
-          <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 drop-shadow-2xl">
-              Let's get in touch
-            </h2>
-            <p className="text-xl md:text-2xl text-white leading-relaxed drop-shadow-2xl">
-              Bereit für dein nächstes Projekt? Lass uns gemeinsam deine Audio-Vision verwirklichen.
-            </p>
-          </div>
-          <ContactForm />
-        </div>
-      </section>
+      <ContactFooter />
     </div>
   );
 }
