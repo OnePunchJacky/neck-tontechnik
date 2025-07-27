@@ -346,7 +346,7 @@ export default function RecordingsPage() {
                             href={recording.acf.spotify}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[var(--color-accent-green)] hover:text-[var(--color-accent-green)] transition-colors">
+                            className="text-[var(--color-accent-green)] hover:text-[var(--color-accent-green)] transition-colors"
                             title="Listen on Spotify"
                           >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -359,7 +359,7 @@ export default function RecordingsPage() {
                             href={recording.acf.youtube}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[var(--color-accent-red)] hover:text-[var(--color-accent-red)] transition-colors">
+                            className="text-[var(--color-accent-red)] hover:text-[var(--color-accent-red)] transition-colors"
                             title="Watch on YouTube"
                           >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
