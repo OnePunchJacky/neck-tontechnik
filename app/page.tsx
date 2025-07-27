@@ -41,7 +41,7 @@ export default function Home() {
   const testimonials = testimonialsData;
 
   return (
-    <div className="min-h-screen bg-zinc-900">
+    <div className="min-h-screen bg-[var(--color-bg)]">
       {/* Hero Section */}
       <Hero
         images={heroImages}
@@ -60,33 +60,33 @@ export default function Home() {
       <main className="flex flex-col items-center justify-center p-8 pb-20 gap-16 sm:p-20 min-h-[600px]">
         <div className="text-center w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-5">
-            <div className="p-5 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors duration-200">
+            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200">
               <div className="flex justify-center mb-4">
                 <img src="/icons/production.png" alt="Musikproduktion" className="w-16 h-16" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-4">Musikproduktion</h3>
-              <p className="text-gray-300">Professionelle Musikproduktion von der Aufnahme bis zum fertigen Track</p>
+              <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Musikproduktion</h3>
+              <p className="text-[var(--color-text-secondary)]">Professionelle Musikproduktion von der Aufnahme bis zum fertigen Track</p>
             </div>
-            <div className="p-5 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors duration-200">
+            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200">
               <div className="flex justify-center mb-4">
                 <img src="/icons/mixing_mastering.png" alt="Mixing & Mastering" className="w-16 h-16" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-4">Mixing & Mastering</h3>
-              <p className="text-gray-300">Hochwertiges Mixing und Mastering für optimale Klangqualität</p>
+              <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Mixing & Mastering</h3>
+              <p className="text-[var(--color-text-secondary)]">Hochwertiges Mixing und Mastering für optimale Klangqualität</p>
             </div>
-            <div className="p-5 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors duration-200">
+            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200">
               <div className="flex justify-center mb-4">
                 <img src="/icons/live.png" alt="Live-Tontechnik" className="w-16 h-16" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-4">Live-Tontechnik</h3>
-              <p className="text-gray-300">Professionelle Beschallung für Konzerte und Veranstaltungen</p>
+              <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Live-Tontechnik</h3>
+              <p className="text-[var(--color-text-secondary)]">Professionelle Beschallung für Konzerte und Veranstaltungen</p>
             </div>
-            <div className="p-5 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors duration-200">
+            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200">
               <div className="flex justify-center mb-4">
                 <img src="/icons/workshops.png" alt="Workshops" className="w-16 h-16" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-4">Workshops</h3>
-              <p className="text-gray-300">Schulungen und Workshops für Tontechnik-Interessierte</p>
+              <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Workshops</h3>
+              <p className="text-[var(--color-text-secondary)]">Schulungen und Workshops für Tontechnik-Interessierte</p>
             </div>
           </div>
         </div>
@@ -120,7 +120,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="text-white font-semibold text-lg mb-2">Mikrofone & Aufnahmetechnik</h3>
-                    <p className="text-gray-300">
+                    <p className="text-[var(--color-text-secondary)]">
                       Hochwertige Kondensator- und Dynamikmikrofone für Studio und Live-Einsatz
                     </p>
                   </div>
@@ -134,7 +134,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="text-white font-semibold text-lg mb-2">Lautsprecher & Verstärker</h3>
-                    <p className="text-gray-300">
+                    <p className="text-[var(--color-text-secondary)]">
                       Professionelle PA-Systeme und Verstärker für Events jeder Größe
                     </p>
                   </div>
@@ -148,7 +148,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="text-white font-semibold text-lg mb-2">Mischpulte & Interfaces</h3>
-                    <p className="text-gray-300">
+                    <p className="text-[var(--color-text-secondary)]">
                       Digitale und analoge Mischpulte sowie Audio-Interfaces für jeden Bedarf
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export default function Home() {
 
             {/* Right Content - CTA */}
             <div className="text-center lg:text-left">
-              <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-xl p-8 text-white">
+              <div className="gradient-primary rounded-xl p-8 text-[var(--color-text-primary)]">
                 <div className="mb-6">
                   <svg className="w-16 h-16 mx-auto lg:mx-0 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13h10M9 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM20.5 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
@@ -199,26 +199,26 @@ export default function Home() {
                   Equipment online mieten
                 </h3>
                 
-                <p className="text-blue-100 mb-6">
+                <p className="text-[var(--color-text-secondary)] mb-6">
                   Durchstöbern Sie unser komplettes Equipment-Sortiment, wählen Sie Ihre Mietdauer und senden Sie uns direkt eine Anfrage.
                 </p>
                 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-center lg:justify-start space-x-2 text-blue-100">
+                  <div className="flex items-center justify-center lg:justify-start space-x-2 text-[var(--color-text-secondary)]">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span className="text-sm">Verfügbarkeit in Echtzeit prüfen</span>
                   </div>
                   
-                  <div className="flex items-center justify-center lg:justify-start space-x-2 text-blue-100">
+                  <div className="flex items-center justify-center lg:justify-start space-x-2 text-[var(--color-text-secondary)]">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
                     <span className="text-sm">Automatische Preisberechnung</span>
                   </div>
                   
-                  <div className="flex items-center justify-center lg:justify-start space-x-2 text-blue-100">
+                  <div className="flex items-center justify-center lg:justify-start space-x-2 text-[var(--color-text-secondary)]">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -229,7 +229,7 @@ export default function Home() {
                 <div className="mt-8">
                   <a
                     href="/equipment-verleih"
-                    className="inline-block bg-white text-blue-700 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-200 shadow-lg"
+                    className="inline-block bg-[var(--color-bg-light)] text-[var(--color-text-primary)] px-8 py-3 rounded-lg font-semibold hover:bg-[var(--color-surface)] transition-colors duration-200 shadow-lg"
                   >
                     Equipment durchstöbern
                   </a>
@@ -259,23 +259,23 @@ export default function Home() {
 
       {/* Full-width content section */}
       <section className="w-full px-8 py-16">
-        <div className="lg:columns-2 gap-8 text-white max-w-7xl mx-auto">
-          <div className="h-100 flex flex-col justify-center bg-zinc-800 p-5 rounded-xl"><h4 className="text-2xl mb-4 font-bold">Technik trifft musikalische Leidenschaft</h4><p>Ich bin nicht nur Tontechniker, sondern auch Multiinstrumentalist. Das gibt mir den ganzheitlichen Blick für einen Sound, der nicht nur technisch einwandfrei, sondern auch musikalisch überzeugt.</p><p className="mt-6 text-xl font-bold">Bei mir bekommt ihr →</p></div>
+        <div className="lg:columns-2 gap-8 text-[var(--color-text-primary)] max-w-7xl mx-auto">
+          <div className="h-100 flex flex-col justify-center bg-[var(--color-surface)] p-5 rounded-xl"><h4 className="text-2xl mb-4 font-bold">Technik trifft musikalische Leidenschaft</h4><p>Ich bin nicht nur Tontechniker, sondern auch Multiinstrumentalist. Das gibt mir den ganzheitlichen Blick für einen Sound, der nicht nur technisch einwandfrei, sondern auch musikalisch überzeugt.</p><p className="mt-6 text-xl font-bold">Bei mir bekommt ihr →</p></div>
           <div className="h-100 flex flex-col justify-center sm:items-center items-center">
-            <div className="p-5 bg-white rounded-xl mb-5 text-black font-bold sm:min-w-[400px] w-full max-w-[400px] flex items-center gap-3">
-              <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-5 bg-[var(--color-primary-100)] rounded-xl mb-5 text-[var(--color-text-dark)] font-bold sm:min-w-[400px] w-full max-w-[400px] flex items-center gap-3">
+              <svg className="w-6 h-6 text-[var(--color-accent-blue)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
               </svg>
               Genreübergreifenden Ansatz
             </div>
-            <div className="p-5 bg-white rounded-xl mb-5 text-black font-bold sm:min-w-[400px] w-full max-w-[400px] flex items-center gap-3">
-              <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-5 bg-[var(--color-primary-100)] rounded-xl mb-5 text-[var(--color-text-dark)] font-bold sm:min-w-[400px] w-full max-w-[400px] flex items-center gap-3">
+              <svg className="w-6 h-6 text-[var(--color-accent-blue)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
               </svg>
               Outboard-Hardware & Logic Pro Expertise
             </div>
-            <div className="p-5 bg-white rounded-xl mb-5 text-black font-bold sm:min-w-[400px] w-full max-w-[400px] flex items-center gap-3">
-              <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-5 bg-[var(--color-primary-100)] rounded-xl mb-5 text-[var(--color-text-dark)] font-bold sm:min-w-[400px] w-full max-w-[400px] flex items-center gap-3">
+              <svg className="w-6 h-6 text-[var(--color-accent-blue)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Live-Sound mit Musiker-Brille
@@ -291,7 +291,7 @@ export default function Home() {
           aria-hidden="true"
         ></div>
         <div className="relative z-10 w-full">
-          <div className="max-w-3xl mx-auto text-center text-white text-xl leading-relaxed px-8 mb-16">
+          <div className="max-w-3xl mx-auto text-center text-[var(--color-text-primary)] text-xl leading-relaxed px-8 mb-16">
             Egal ob fette Liveshows, präzise Studioarbeit oder praxisnahe Workshops – ich bringe Sound auf die nächste Stufe. Mit jahrelanger Erfahrung als Live- und Studiotechniker sorge ich dafür, dass deine Musik genau so klingt, wie sie klingen soll.
           </div>
           <div className="max-w-5xl mx-auto px-8">
@@ -301,25 +301,25 @@ export default function Home() {
       </div>
 
       {/* Special Offers & Newsletter Section */}
-      <section className="w-full bg-zinc-800 py-20 px-4 md:px-8">
+      <section className="w-full bg-[var(--color-surface)] py-20 px-4 md:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {/* Gratis Testmaster */}
-          <div className="bg-zinc-900 rounded-xl p-8 flex flex-col justify-between shadow-lg">
+          <div className="bg-[var(--color-surface-dark)] rounded-xl p-8 flex flex-col justify-between shadow-lg">
             <div>
-              <h3 className="text-2xl font-bold text-white mb-2">Gratis Testmaster</h3>
-              <p className="text-white mb-8">Probiere einen kurzen Ausschnitt (45 Sek.) deines Tracks — kostenlos.</p>
+              <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">Gratis Testmaster</h3>
+              <p className="text-[var(--color-text-primary)] mb-8">Probiere einen kurzen Ausschnitt (45 Sek.) deines Tracks — kostenlos.</p>
             </div>
-            <a href="#contact" className="inline-flex items-center bg-white text-black font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition mb-2 w-fit">
+            <a href="#contact" className="inline-flex items-center bg-[var(--color-primary-100)] text-[var(--color-text-dark)] font-semibold px-6 py-3 rounded-lg shadow hover:bg-[var(--color-primary-50)] transition mb-2 w-fit">
               Jetzt anfragen <span className="ml-2">→</span>
             </a>
           </div>
           {/* Mix/Master-Bundle */}
-          <div className="bg-zinc-900 rounded-xl p-8 flex flex-col justify-between shadow-lg">
+          <div className="bg-[var(--color-surface-dark)] rounded-xl p-8 flex flex-col justify-between shadow-lg">
             <div>
-              <h3 className="text-2xl font-bold text-white mb-2">Mix/Master-Bundle</h3>
-              <p className="text-white mb-8">10 % Rabatt auf dein nächstes Mastering-Projekt.</p>
+              <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">Mix/Master-Bundle</h3>
+              <p className="text-[var(--color-text-primary)] mb-8">10 % Rabatt auf dein nächstes Mastering-Projekt.</p>
             </div>
-            <a href="#contact" className="inline-flex items-center bg-white text-black font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition mb-2 w-fit">
+            <a href="#contact" className="inline-flex items-center bg-[var(--color-primary-100)] text-[var(--color-text-dark)] font-semibold px-6 py-3 rounded-lg shadow hover:bg-[var(--color-primary-50)] transition mb-2 w-fit">
               Angebot sichern <span className="ml-2">→</span>
             </a>
           </div>
@@ -328,7 +328,7 @@ export default function Home() {
           {/* Newsletter Text */}
           <div>
             <h3 className="text-2xl font-bold text-white mb-2">Sound-Insights & exklusive Angebote direkt in dein Postfach.</h3>
-            <p className="text-white">Noch ein Newsletter? Dann miste doch mal aus und mach Platz für das, was dich weiterbringt. In meinem Newsletter bekommst du Branchen-Insights, Techniques und Tipps, wie du deine Karriere als Tontechniker und Produzent aufs nächste Level bringst. <span className="ml-1">→</span></p>
+            <p className="text-[var(--color-text-primary)]">Noch ein Newsletter? Dann miste doch mal aus und mach Platz für das, was dich weiterbringt. In meinem Newsletter bekommst du Branchen-Insights, Techniques und Tipps, wie du deine Karriere als Tontechniker und Produzent aufs nächste Level bringst. <span className="ml-1">→</span></p>
           </div>
           {/* Newsletter Signup */}
           <NewsletterForm />

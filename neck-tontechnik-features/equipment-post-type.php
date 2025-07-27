@@ -375,9 +375,14 @@ function add_equipment_meta_to_rest_api() {
     );
 
     foreach ($meta_fields as $meta_field) {
-        register_rest_field('gear', str_replace('_', '', $meta_field), array(
+        register_rest_field('gear', $meta_field, array(
             'get_callback' => function($object) use ($meta_field) {
-                return get_post_meta($object['id'], $meta_field, true);
+                $value = get_post_meta($object['id'], $meta_field, true);
+                // Convert numeric fields to proper numbers
+                if (in_array($meta_field, ['_equipment_menge', '_equipment_preis', '_tagesmiete', '_wochenendmiete', '_wochenmiete', '_monatsmiete', '_kaution', '_insurance_value'])) {
+                    return $value ? (float)$value : 0;
+                }
+                return $value ?: '';
             },
             'update_callback' => function($value, $object) use ($meta_field) {
                 return update_post_meta($object->ID, $meta_field, $value);

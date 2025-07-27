@@ -136,7 +136,7 @@ function getCategoryColor(categoryName: string): string {
     'Recording': 'bg-green-100 text-green-800',
     'Production': 'bg-orange-100 text-orange-800',
   };
-  return colorMap[categoryName] || 'bg-gray-100 text-gray-800';
+  return colorMap[categoryName] || 'bg-[var(--color-surface-light)] text-[var(--color-text-primary)]';
 }
 
 
@@ -186,22 +186,22 @@ export default function RecordingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-900">
+    <div className="min-h-screen bg-[var(--color-bg)]">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-zinc-800 to-zinc-900 pt-20 pb-32">
+      <section className="relative bg-gradient-to-b from-[var(--color-surface)] to-[var(--color-bg)] pt-20 pb-32">
         <div className="absolute inset-0 bg-[url('/images/studio-bg.jpg')] bg-cover bg-center opacity-20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold text-[var(--color-text-primary)] mb-6">
             Recordings & Produktionen
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-[var(--color-text-secondary)] max-w-3xl mx-auto">
             Entdecken Sie unsere professionellen Audio-Produktionen aus den Bereichen Recording, Mixing, Mastering und Production
           </p>
         </div>
       </section>
 
       {/* Filter Tabs */}
-      <section className="sticky top-0 z-40 bg-zinc-800 border-b border-zinc-700">
+      <section className="sticky top-0 z-40 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8 overflow-x-auto py-4">
             {filterButtons.map((filter) => (
@@ -210,8 +210,8 @@ export default function RecordingsPage() {
                 onClick={() => setActiveFilter(filter.value)}
                 className={`font-medium whitespace-nowrap pb-2 border-b-2 transition-colors ${
                   activeFilter === filter.value
-                    ? 'text-white border-blue-500'
-                    : 'text-gray-400 hover:text-white border-transparent hover:border-gray-400'
+                    ? 'text-[var(--color-text-primary)] border-[var(--color-accent-blue)]'
+                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] border-transparent hover:border-[var(--color-text-muted)]'
                 }`}
               >
                 {filter.label}
@@ -229,7 +229,7 @@ export default function RecordingsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-flex items-center gap-2 text-gray-400">
+              <div className="inline-flex items-center gap-2 text-[var(--color-text-muted)]">
                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -239,7 +239,7 @@ export default function RecordingsPage() {
             </div>
           ) : filteredRecordings.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-400 text-lg">
+              <p className="text-[var(--color-text-muted)] text-lg">
                 {activeFilter === 'all' 
                   ? 'Keine Aufnahmen gefunden.' 
                   : `Keine Aufnahmen in der Kategorie "${filterButtons.find(f => f.value === activeFilter)?.label}" gefunden.`
@@ -254,10 +254,10 @@ export default function RecordingsPage() {
                 return (
                   <article
                     key={recording.id}
-                    className="bg-zinc-800 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 group"
+                    className="bg-[var(--color-surface)] rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 group"
                   >
                     {/* Album Cover */}
-                    <div className="relative h-64 bg-zinc-700 overflow-hidden">
+                    <div className="relative h-64 bg-[var(--color-surface-light)] overflow-hidden">
                       {recording.coverImage?.source_url ? (
                         <>
                           {/* Using regular img tag for better debugging */}
@@ -276,12 +276,12 @@ export default function RecordingsPage() {
                             }}
                           />
                           {/* Fallback for failed images */}
-                          <div className="absolute inset-0 w-full h-full items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-700" style={{ display: 'none' }}>
+                          <div className="absolute inset-0 w-full h-full items-center justify-center bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-surface-light)]" style={{ display: 'none' }}>
                             <div className="flex items-center justify-center gap-1 h-32">
                               {[...Array(20)].map((_, i) => (
                                 <div
                                   key={i}
-                                  className="w-1 bg-gradient-to-t from-blue-500 to-purple-500 rounded-full transition-all duration-300 group-hover:from-blue-400 group-hover:to-purple-400 animate-waveform"
+                                  className="w-1 bg-gradient-to-t from-[var(--color-accent-blue)] to-[var(--color-accent-purple)] rounded-full transition-all duration-300 group-hover:from-[var(--color-accent-blue)] group-hover:to-[var(--color-accent-purple)] animate-waveform"
                                   style={{
                                     height: `${Math.random() * 100 + 20}%`,
                                     animationDelay: `${i * 0.05}s`,
@@ -293,13 +293,13 @@ export default function RecordingsPage() {
                           </div>
                         </>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-700">
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-surface-light)]">
                           {/* Audio waveform visualization as fallback */}
                           <div className="flex items-center justify-center gap-1 h-32">
                             {[...Array(20)].map((_, i) => (
                               <div
                                 key={i}
-                                className="w-1 bg-gradient-to-t from-blue-500 to-purple-500 rounded-full transition-all duration-300 group-hover:from-blue-400 group-hover:to-purple-400 animate-waveform"
+                                className="w-1 bg-gradient-to-t from-[var(--color-accent-blue)] to-[var(--color-accent-purple)] rounded-full transition-all duration-300 group-hover:from-[var(--color-accent-blue)] group-hover:to-[var(--color-accent-purple)] animate-waveform"
                                 style={{
                                   height: `${Math.random() * 100 + 20}%`,
                                   animationDelay: `${i * 0.05}s`,
@@ -328,13 +328,13 @@ export default function RecordingsPage() {
                       </div>
                       
                       {/* Title */}
-                      <h3 className="text-xl font-semibold text-white mb-1 line-clamp-2 group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-xl font-semibold text-[var(--color-text-primary)] mb-1 line-clamp-2 group-hover:text-[var(--color-accent-blue)] transition-colors">
                         {recording.title.rendered}
                       </h3>
                       
                       {/* Artist */}
                       {recording._embedded?.['acf:post']?.[0] && (
-                        <p className="text-gray-400 text-sm mb-4">
+                        <p className="text-[var(--color-text-muted)] text-sm mb-4">
                           by {recording._embedded['acf:post'][0].title.rendered}
                         </p>
                       )}
@@ -346,7 +346,7 @@ export default function RecordingsPage() {
                             href={recording.acf.spotify}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-green-500 hover:text-green-400 transition-colors"
+                            className="text-[var(--color-accent-green)] hover:text-[var(--color-accent-green)] transition-colors">
                             title="Listen on Spotify"
                           >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -359,7 +359,7 @@ export default function RecordingsPage() {
                             href={recording.acf.youtube}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-red-500 hover:text-red-400 transition-colors"
+                            className="text-[var(--color-accent-red)] hover:text-[var(--color-accent-red)] transition-colors">
                             title="Watch on YouTube"
                           >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -372,7 +372,7 @@ export default function RecordingsPage() {
                             href={recording.acf.soundcloud}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-orange-500 hover:text-orange-400 transition-colors"
+                            className="text-[var(--color-accent-orange)] hover:text-[var(--color-accent-orange)] transition-colors"
                             title="Listen on SoundCloud"
                           >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -385,7 +385,7 @@ export default function RecordingsPage() {
                             href={recording.acf.bandcamp}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-400 hover:text-blue-300 transition-colors"
+                            className="text-[var(--color-accent-blue)] hover:text-[var(--color-accent-blue)] transition-colors"
                             title="Listen on Bandcamp"
                           >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -396,7 +396,7 @@ export default function RecordingsPage() {
                       </div>
                       
                       {/* Date */}
-                      <time className="text-sm text-gray-500 block">
+                      <time className="text-sm text-[var(--color-text-muted)] block">
                         {new Date(recording.date).toLocaleDateString('de-DE', {
                           year: 'numeric',
                           month: 'long',

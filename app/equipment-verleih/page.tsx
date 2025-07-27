@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import ContactFooter from '../components/ContactFooter';
 
 // Type definitions for WordPress equipment
@@ -148,38 +149,6 @@ async function checkAvailabilityForPeriod(equipmentId: number, startDate: string
   }
 }
 
-async function submitRentalRequest(requestData: any): Promise<boolean> {
-  try {
-    const formData = new FormData();
-    
-    // Add all fields to FormData
-    Object.keys(requestData).forEach(key => {
-      if (typeof requestData[key] === 'object') {
-        formData.append(key, JSON.stringify(requestData[key]));
-      } else {
-        formData.append(key, requestData[key]);
-      }
-    });
-    
-    formData.append('action', 'multi_rental_request');
-    formData.append('nonce', 'rental_nonce'); // You'd get this from WordPress localization
-    
-    const response = await fetch('https://staging.neck-tontechnik.com/wp-admin/admin-ajax.php', {
-      method: 'POST',
-      body: formData,
-    });
-    
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    
-    const result = await response.json();
-    return result.success;
-  } catch (error) {
-    console.error('Error submitting rental request:', error);
-    return false;
-  }
-}
 
 function getCategoryColor(categoryName: string): string {
   const colorMap: { [key: string]: string } = {
@@ -195,6 +164,7 @@ function getCategoryColor(categoryName: string): string {
 }
 
 export default function EquipmentRentalPage() {
+  const router = useRouter();
   const [equipment, setEquipment] = useState<WPEquipment[]>([]);
   const [filteredEquipment, setFilteredEquipment] = useState<WPEquipment[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -210,21 +180,11 @@ export default function EquipmentRentalPage() {
     totalPrice: 0
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   
   // Date selection
   const [selectedStartDate, setSelectedStartDate] = useState('');
   const [selectedEndDate, setSelectedEndDate] = useState('');
   const [dateError, setDateError] = useState('');
-  
-  // Customer form
-  const [customerForm, setCustomerForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    message: ''
-  });
   
   useEffect(() => {
     async function fetchData() {
@@ -310,8 +270,8 @@ export default function EquipmentRentalPage() {
     } else if (days >= 7 && weeklyRate > 0) {
       const weeks = Math.ceil(days / 7);
       price = weeklyRate * weeks * quantity;
-    } else if (days === 3 && weekendRate > 0 && start.getDay() === 5) {
-      // Weekend rental (Friday-Sunday)
+    } else if (days >= 2 && days <= 3 && weekendRate > 0) {
+      // Weekend rental (2-3 days) - more flexible than just Friday-Sunday
       price = weekendRate * quantity;
     } else {
       price = dailyRate * days * quantity;
@@ -408,40 +368,16 @@ export default function EquipmentRentalPage() {
     setIsCartOpen(false);
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (cart.items.length === 0) {
       return;
     }
     
-    if (!customerForm.name || !customerForm.email) {
-      alert('Bitte füllen Sie Name und E-Mail aus');
-      return;
-    }
+    // Save cart to localStorage
+    localStorage.setItem('rentalCart', JSON.stringify(cart));
     
-    const requestData = {
-      customer_name: customerForm.name,
-      customer_email: customerForm.email,
-      customer_phone: customerForm.phone,
-      customer_company: customerForm.company,
-      customer_message: customerForm.message,
-      rental_start: cart.startDate,
-      rental_end: cart.endDate,
-      cart_data: cart.items.map(item => ({
-        equipmentId: item.equipmentId,
-        quantity: item.quantity
-      }))
-    };
-    
-    const success = await submitRentalRequest(requestData);
-    
-    if (success) {
-      alert('Ihre Anfrage wurde erfolgreich gesendet! Sie erhalten eine Bestätigung per E-Mail.');
-      clearCart();
-      setIsCheckoutOpen(false);
-      setCustomerForm({ name: '', email: '', phone: '', company: '', message: '' });
-    } else {
-      alert('Fehler beim Senden der Anfrage. Bitte versuchen Sie es erneut.');
-    }
+    // Navigate to checkout page
+    router.push('/checkout');
   };
 
   const formatPrice = (price: number): string => {
@@ -664,25 +600,25 @@ export default function EquipmentRentalPage() {
                             <>
                               {dailyRate > 0 && (
                                 <div className="flex justify-between text-sm">
-                                  <span className="text-gray-400">Tagesmiete:</span>
+                                  <span className="text-[var(--color-text-muted)]">Tagesmiete:</span>
                                   <span className="text-white font-medium">{formatPrice(dailyRate)}</span>
                                 </div>
                               )}
                               {weekendRate > 0 && (
                                 <div className="flex justify-between text-sm">
-                                  <span className="text-gray-400">Wochenende:</span>
+                                  <span className="text-[var(--color-text-muted)]">Wochenende:</span>
                                   <span className="text-white font-medium">{formatPrice(weekendRate)}</span>
                                 </div>
                               )}
                               {weeklyRate > 0 && (
                                 <div className="flex justify-between text-sm">
-                                  <span className="text-gray-400">Wochenmiete:</span>
+                                  <span className="text-[var(--color-text-muted)]">Wochenmiete:</span>
                                   <span className="text-white font-medium">{formatPrice(weeklyRate)}</span>
                                 </div>
                               )}
                               {deposit > 0 && (
                                 <div className="flex justify-between text-sm">
-                                  <span className="text-gray-400">Kaution:</span>
+                                  <span className="text-[var(--color-text-muted)]">Kaution:</span>
                                   <span className="text-orange-400 font-medium">{formatPrice(deposit)}</span>
                                 </div>
                               )}
@@ -696,7 +632,7 @@ export default function EquipmentRentalPage() {
                         
                         {/* Availability */}
                         <div className="flex justify-between items-center mb-4">
-                          <span className="text-gray-400 text-sm">Verfügbar:</span>
+                          <span className="text-[var(--color-text-muted)] text-sm">Verfügbar:</span>
                           <span className="text-white font-medium">{totalUnits} Stück</span>
                         </div>
                         
@@ -704,7 +640,7 @@ export default function EquipmentRentalPage() {
                         {hasMetaData && status === 'verfügbar' && selectedStartDate && selectedEndDate && !dateError ? (
                           <div className="space-y-3">
                             <div className="flex items-center gap-3">
-                              <label htmlFor={`qty-${item.id}`} className="text-gray-300 text-sm">
+                              <label htmlFor={`qty-${item.id}`} className="text-[var(--color-text-secondary)] text-sm">
                                 Anzahl:
                               </label>
                               <input
@@ -713,7 +649,7 @@ export default function EquipmentRentalPage() {
                                 min="1"
                                 max={totalUnits}
                                 defaultValue="1"
-                                className="w-20 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-20 px-2 py-1 bg-[var(--color-surface-light)] border border-[var(--color-neutral)] rounded text-[var(--color-text-primary)] text-center focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                               />
                             </div>
                             <button
@@ -811,7 +747,7 @@ export default function EquipmentRentalPage() {
                 {/* Cart Actions */}
                 <div className="space-y-2">
                   <button
-                    onClick={() => setIsCheckoutOpen(true)}
+                    onClick={handleCheckout}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                   >
                     Zur Kasse
@@ -829,139 +765,6 @@ export default function EquipmentRentalPage() {
         </div>
       )}
 
-      {/* Checkout Modal */}
-      {isCheckoutOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Mietanfrage abschließen</h2>
-                <button
-                  onClick={() => setIsCheckoutOpen(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Order Summary */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3">Bestellübersicht</h3>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="mb-3">
-                    <strong>Mietzeitraum:</strong> {new Date(cart.startDate).toLocaleDateString('de-DE')} - {new Date(cart.endDate).toLocaleDateString('de-DE')}
-                  </div>
-                  <div className="space-y-2">
-                    {cart.items.map((item) => (
-                      <div key={item.equipmentId} className="flex justify-between">
-                        <span>{item.title} ({item.quantity}x)</span>
-                        <span>{formatPrice(calculatePrice({ meta: item } as any, item.quantity, cart.startDate, cart.endDate))}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="border-t pt-2 mt-2">
-                    <div className="flex justify-between font-bold">
-                      <span>Gesamtpreis:</span>
-                      <span>{formatPrice(cart.totalPrice)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Customer Form */}
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleCheckout();
-              }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <label htmlFor="customer-name" className="block text-sm font-medium text-gray-700 mb-1">
-                      Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="customer-name"
-                      required
-                      value={customerForm.name}
-                      onChange={(e) => setCustomerForm({ ...customerForm, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="customer-email" className="block text-sm font-medium text-gray-700 mb-1">
-                      E-Mail *
-                    </label>
-                    <input
-                      type="email"
-                      id="customer-email"
-                      required
-                      value={customerForm.email}
-                      onChange={(e) => setCustomerForm({ ...customerForm, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="customer-phone" className="block text-sm font-medium text-gray-700 mb-1">
-                      Telefon
-                    </label>
-                    <input
-                      type="tel"
-                      id="customer-phone"
-                      value={customerForm.phone}
-                      onChange={(e) => setCustomerForm({ ...customerForm, phone: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="customer-company" className="block text-sm font-medium text-gray-700 mb-1">
-                      Firma (optional)
-                    </label>
-                    <input
-                      type="text"
-                      id="customer-company"
-                      value={customerForm.company}
-                      onChange={(e) => setCustomerForm({ ...customerForm, company: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-                
-                <div className="mb-6">
-                  <label htmlFor="customer-message" className="block text-sm font-medium text-gray-700 mb-1">
-                    Nachricht (optional)
-                  </label>
-                  <textarea
-                    id="customer-message"
-                    rows={4}
-                    value={customerForm.message}
-                    onChange={(e) => setCustomerForm({ ...customerForm, message: e.target.value })}
-                    placeholder="Besondere Wünsche oder Anmerkungen..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div className="flex gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsCheckoutOpen(false)}
-                    className="flex-1 bg-gray-400 hover:bg-gray-500 text-white px-6 py-3 rounded-md font-medium transition-colors"
-                  >
-                    Abbrechen
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium transition-colors"
-                  >
-                    Anfrage senden
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Contact Footer */}
       <ContactFooter />

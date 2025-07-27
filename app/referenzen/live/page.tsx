@@ -127,7 +127,7 @@ function getCategoryColor(categoryName: string): string {
     'Club': 'bg-pink-100 text-pink-800',
     'Conference': 'bg-indigo-100 text-indigo-800',
   };
-  return colorMap[categoryName] || 'bg-gray-100 text-gray-800';
+  return colorMap[categoryName] || 'bg-[var(--color-surface-light)] text-[var(--color-text-primary)]';
 }
 
 function stripHtml(html: string): string {
@@ -191,15 +191,15 @@ export default function LiveReferencesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-900">
+    <div className="min-h-screen bg-[var(--color-bg)]">
       {/* Hero Section */}
       <section className="relative py-20 md:py-32 overflow-hidden min-h-[80vh] flex items-center">
         <div className="absolute inset-0 z-0 bg-[url('/images/live.jpeg')] bg-cover bg-center bg-fixed opacity-20"></div>
         <div className="relative z-10 max-w-4xl mx-auto text-center px-4 md:px-8">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
+          <h1 className="text-4xl md:text-6xl font-bold text-[var(--color-text-primary)] mb-6 drop-shadow-2xl">
             Live Events & Referenzen
           </h1>
-          <p className="text-xl md:text-2xl text-white leading-relaxed drop-shadow-2xl mb-8">
+          <p className="text-xl md:text-2xl text-[var(--color-text-primary)] leading-relaxed drop-shadow-2xl mb-8">
             Erfolgreich umgesetzte Live-Events, Konzerte und Veranstaltungen mit professioneller Tontechnik
           </p>
         </div>
@@ -207,7 +207,7 @@ export default function LiveReferencesPage() {
 
       {/* Filter Tabs */}
       {categories.length > 0 && (
-        <section className="sticky top-0 z-40 bg-zinc-800 border-b border-zinc-700">
+        <section className="sticky top-0 z-40 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex space-x-8 overflow-x-auto py-4">
               {filterButtons.map((filter) => (
@@ -216,8 +216,8 @@ export default function LiveReferencesPage() {
                   onClick={() => setActiveFilter(filter.value)}
                   className={`font-medium whitespace-nowrap pb-2 border-b-2 transition-colors ${
                     activeFilter === filter.value
-                      ? 'text-white border-blue-500'
-                      : 'text-gray-400 hover:text-white border-transparent hover:border-gray-400'
+                      ? 'text-[var(--color-text-primary)] border-[var(--color-accent-blue)]'
+                      : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] border-transparent hover:border-[var(--color-text-muted)]'
                   }`}
                 >
                   {filter.label}
@@ -236,7 +236,7 @@ export default function LiveReferencesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-flex items-center gap-2 text-gray-400">
+              <div className="inline-flex items-center gap-2 text-[var(--color-text-muted)]">
                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -246,7 +246,7 @@ export default function LiveReferencesPage() {
             </div>
           ) : filteredReferences.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-400 text-lg">
+              <p className="text-[var(--color-text-muted)] text-lg">
                 {activeFilter === 'all' 
                   ? 'Keine Live-Referenzen gefunden.' 
                   : `Keine Referenzen in der Kategorie "${filterButtons.find(f => f.value === activeFilter)?.label}" gefunden.`
@@ -262,10 +262,10 @@ export default function LiveReferencesPage() {
                 return (
                   <article
                     key={reference.id}
-                    className="bg-zinc-800 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 group"
+                    className="bg-[var(--color-surface)] rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 group"
                   >
                     {/* Featured Image */}
-                    <div className="relative h-64 bg-zinc-700 overflow-hidden">
+                    <div className="relative h-64 bg-[var(--color-surface-light)] overflow-hidden">
                       {reference.featuredImage?.source_url ? (
                         <>
                           <img
@@ -277,10 +277,10 @@ export default function LiveReferencesPage() {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-700">
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-surface-light)]">
                           {/* Audio/Live icon as fallback */}
                           <div className="flex items-center justify-center">
-                            <svg className="w-16 h-16 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-16 h-16 text-[var(--color-accent-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                             </svg>
                           </div>
@@ -303,13 +303,13 @@ export default function LiveReferencesPage() {
                       </div>
                       
                       {/* Title */}
-                      <h3 className="text-xl font-semibold text-white mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-xl font-semibold text-[var(--color-text-primary)] mb-2 line-clamp-2 group-hover:text-[var(--color-accent-blue)] transition-colors">
                         {reference.title.rendered}
                       </h3>
                       
                       {/* Venue & Location */}
                       {(reference.acf?.venue_name || reference.acf?.location) && (
-                        <div className="text-gray-400 text-sm mb-3">
+                        <div className="text-[var(--color-text-muted)] text-sm mb-3">
                           {reference.acf?.venue_name && (
                             <div className="font-medium">{reference.acf.venue_name}</div>
                           )}
@@ -326,7 +326,7 @@ export default function LiveReferencesPage() {
                       )}
                       
                       {/* Event Details */}
-                      <div className="flex flex-wrap gap-4 text-xs text-gray-400 mb-4">
+                      <div className="flex flex-wrap gap-4 text-xs text-[var(--color-text-muted)] mb-4">
                         {eventDate && (
                           <div className="flex items-center gap-1">
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -344,7 +344,7 @@ export default function LiveReferencesPage() {
                           </div>
                         )}
                         {reference.acf?.event_type && (
-                          <div className="bg-zinc-700 px-2 py-1 rounded">
+                          <div className="bg-[var(--color-surface-light)] px-2 py-1 rounded">
                             {reference.acf.event_type}
                           </div>
                         )}
@@ -352,26 +352,26 @@ export default function LiveReferencesPage() {
                       
                       {/* Description */}
                       {reference.content.rendered && (
-                        <p className="text-gray-300 text-sm mb-4 line-clamp-3">
+                        <p className="text-[var(--color-text-secondary)] text-sm mb-4 line-clamp-3">
                           {stripHtml(reference.content.rendered)}
                         </p>
                       )}
                       
                       {/* Equipment Used */}
                       {reference.acf?.equipment_used && (
-                        <div className="text-xs text-gray-500 border-t border-zinc-700 pt-3">
+                        <div className="text-xs text-[var(--color-text-muted)] border-t border-[var(--color-border)] pt-3">
                           <strong>Equipment:</strong> {reference.acf.equipment_used}
                         </div>
                       )}
                       
                       {/* Client Testimonial */}
                       {reference.acf?.client_testimonial && (
-                        <div className="mt-4 p-3 bg-zinc-700 rounded-lg">
-                          <p className="text-gray-300 text-sm italic mb-2">
+                        <div className="mt-4 p-3 bg-[var(--color-surface-light)] rounded-lg">
+                          <p className="text-[var(--color-text-secondary)] text-sm italic mb-2">
                             "{reference.acf.client_testimonial}"
                           </p>
                           {reference.acf?.client_name && (
-                            <div className="text-xs text-gray-400">
+                            <div className="text-xs text-[var(--color-text-muted)]">
                               — {reference.acf.client_name}
                               {reference.acf?.client_position && `, ${reference.acf.client_position}`}
                             </div>

@@ -77,7 +77,7 @@ export default function Hero({
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/20"></div>
         {(image.title || image.description) && (
           <div className="absolute inset-0 flex items-center justify-center z-20">
-            <div className="text-center text-white px-4">
+            <div className="text-center text-[var(--color-text-primary)] px-4">
               {image.title && (
                 <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-2xl">
                   {image.title}
@@ -136,7 +136,7 @@ export default function Hero({
                 {ctaButtons.primary && (
                   <a
                     href={ctaButtons.primary.href}
-                    className="bg-white hover:bg-gray-100 text-black px-8 py-3 rounded-md text-lg font-medium transition-colors duration-200 drop-shadow-lg"
+                    className="bg-[var(--color-primary-100)] hover:bg-[var(--color-primary-50)] text-[var(--color-text-dark)] px-8 py-3 rounded-md text-lg font-medium transition-colors duration-200 drop-shadow-lg"
                   >
                     {ctaButtons.primary.text}
                   </a>
@@ -144,7 +144,7 @@ export default function Hero({
                 {ctaButtons.secondary && (
                   <a
                     href={ctaButtons.secondary.href}
-                    className="bg-white hover:bg-gray-100 text-black px-8 py-3 rounded-md text-lg font-medium transition-colors duration-200 drop-shadow-lg"
+                    className="bg-[var(--color-primary-100)] hover:bg-[var(--color-primary-50)] text-[var(--color-text-dark)] px-8 py-3 rounded-md text-lg font-medium transition-colors duration-200 drop-shadow-lg"
                   >
                     {ctaButtons.secondary.text}
                   </a>
@@ -160,7 +160,7 @@ export default function Hero({
         <>
           <button
             onClick={scrollPrev}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 z-30"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-[var(--color-bg-dark)] bg-opacity-50 hover:bg-opacity-75 text-[var(--color-text-primary)] p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 z-30"
             aria-label="Previous slide"
           >
             <svg
@@ -179,7 +179,7 @@ export default function Hero({
           </button>
           <button
             onClick={scrollNext}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 z-30"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-[var(--color-bg-dark)] bg-opacity-50 hover:bg-opacity-75 text-[var(--color-text-primary)] p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 z-30"
             aria-label="Next slide"
           >
             <svg

@@ -41,7 +41,7 @@ export default function ContactForm() {
     <div className="max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
+          <label htmlFor="name" className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
             Name *
           </label>
           <input
@@ -51,13 +51,13 @@ export default function ContactForm() {
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-[var(--color-surface)] border border-[var(--color-neutral)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
             placeholder="Dein Name"
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
+          <label htmlFor="email" className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
             E-Mail *
           </label>
           <input
@@ -67,13 +67,13 @@ export default function ContactForm() {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-[var(--color-surface)] border border-[var(--color-neutral)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
             placeholder="deine@email.com"
           />
         </div>
 
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-white mb-2">
+          <label htmlFor="message" className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
             Kommentar oder Nachricht
           </label>
           <textarea
@@ -83,7 +83,7 @@ export default function ContactForm() {
             onChange={handleChange}
             required
             rows={6}
-            className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="w-full px-4 py-3 bg-[var(--color-surface)] border border-[var(--color-neutral)] rounded-lg text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent resize-none"
             placeholder="Erzähl mir mehr über dein Projekt..."
           />
         </div>
@@ -91,19 +91,19 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors duration-200"
+          className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-600)] disabled:bg-[var(--color-primary-700)] text-[var(--color-text-primary)] px-8 py-3 rounded-lg text-lg font-medium transition-colors duration-200"
         >
           {isSubmitting ? 'Wird gesendet...' : 'Absenden'}
         </button>
 
         {submitStatus === 'success' && (
-          <div className="p-4 bg-green-900 border border-green-700 rounded-lg text-green-100">
+          <div className="p-4 bg-[var(--color-success)] bg-opacity-20 border border-[var(--color-success)] rounded-lg text-[var(--color-text-primary)]">
             Vielen Dank! Deine Nachricht wurde erfolgreich gesendet. Ich melde mich bald bei dir.
           </div>
         )}
 
         {submitStatus === 'error' && (
-          <div className="p-4 bg-red-900 border border-red-700 rounded-lg text-red-100">
+          <div className="p-4 bg-[var(--color-error)] bg-opacity-20 border border-[var(--color-error)] rounded-lg text-[var(--color-text-primary)]">
             Es gab einen Fehler beim Senden deiner Nachricht. Bitte versuche es noch einmal.
           </div>
         )}

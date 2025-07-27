@@ -9,10 +9,10 @@ export default function ContactFooter() {
       ></div>
       <div className="relative z-10 w-full px-4 md:px-8">
         <div className="max-w-4xl mx-auto text-center mb-12">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 drop-shadow-2xl">
+          <h2 className="text-3xl md:text-5xl font-bold text-[var(--color-text-primary)] mb-6 drop-shadow-2xl">
             Let's get in touch
           </h2>
-          <p className="text-xl md:text-2xl text-white leading-relaxed drop-shadow-2xl">
+          <p className="text-xl md:text-2xl text-[var(--color-text-primary)] leading-relaxed drop-shadow-2xl">
             Bereit für dein nächstes Projekt? Lass uns gemeinsam deine Audio-Vision verwirklichen.
           </p>
         </div>
