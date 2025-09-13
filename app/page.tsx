@@ -252,7 +252,7 @@ export default function Home() {
               </div>
 
               <div className="bg-[var(--color-surface)] bg-opacity-90 rounded-lg p-6 backdrop-blur-sm">
-                <h4 className="text-[var(--color-text-primary)] font-semibold text-lg mb-3">Warum Equipment von uns mieten?</h4>
+                <h4 className="text-[var(--color-text-primary)] font-semibold text-lg mb-3">Warum Equipment von mir mieten?</h4>
                 <ul className="space-y-2 text-[var(--color-text-secondary)]">
                   <li className="flex items-center space-x-2">
                     <svg className="w-4 h-4 text-[var(--color-accent-green)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,7 +296,7 @@ export default function Home() {
                 </h3>
                 
                 <p className="text-[var(--color-text-secondary)] mb-6">
-                  Durchstöbere unser komplettes Equipment-Sortiment, wähle deine Mietdauer und sende uns direkt eine Anfrage.
+                  Durchstöbere mein komplettes Equipment-Sortiment, wähle deine Mietdauer und sende mir direkt eine Anfrage.
                 </p>
                 
                 <div className="space-y-3">

@@ -195,7 +195,7 @@ export default function RecordingsPage() {
             Recordings & Produktionen
           </h1>
           <p className="text-xl text-[var(--color-text-secondary)] max-w-3xl mx-auto">
-            Entdecken Sie unsere professionellen Audio-Produktionen aus den Bereichen Recording, Mixing, Mastering und Production
+            Entdecken Sie meine professionellen Audio-Produktionen aus den Bereichen Recording, Mixing, Mastering und Production
           </p>
         </div>
       </section>
