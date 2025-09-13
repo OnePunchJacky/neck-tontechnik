@@ -58,28 +58,28 @@ export default function Home() {
       <section className="py-16 md:py-20 px-4 md:px-8 min-h-[80vh] flex items-center">
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200">
+            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200 text-center">
               <div className="flex justify-center mb-4">
                 <img src="/icons/production.png" alt="Musikproduktion" className="w-16 h-16" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Musikproduktion</h3>
               <p className="text-[var(--color-text-secondary)]">Professionelle Musikproduktion von der Aufnahme bis zum Release</p>
             </div>
-            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200">
+            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200 text-center">
               <div className="flex justify-center mb-4">
                 <img src="/icons/mixing_mastering.png" alt="Mixing & Mastering" className="w-16 h-16" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Mixing & Mastering</h3>
               <p className="text-[var(--color-text-secondary)]">Hochwertiges Mixing und Mastering für optimale Klangqualität</p>
             </div>
-            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200">
+            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200 text-center">
               <div className="flex justify-center mb-4">
                 <img src="/icons/live.png" alt="Live-Tontechnik" className="w-16 h-16" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Live-Tontechnik</h3>
               <p className="text-[var(--color-text-secondary)]">Ausgewogener Klang mit Impact für Konzerte und Veranstaltungen</p>
             </div>
-            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200">
+            <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200 text-center">
               <div className="flex justify-center mb-4">
                 <img src="/icons/workshops.png" alt="Workshops" className="w-16 h-16" />
               </div>
