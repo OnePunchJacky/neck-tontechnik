@@ -12,13 +12,13 @@ export default function Home() {
       src: "/images/home/home-hero-1.jpg",
       alt: "Professional audio engineering setup",
       title: "Klang auf den Punkt – Live und im Studio",
-      description: "Professionelle Tontechnik-Lösungen für Veranstaltungen, Studios und Installationen"
+      description: "Professionelle Tontechnik-Lösungen für Veranstaltungen und Studios"
     },
     {
       src: "/images/home/home-hero-2.jpg",
       alt: "2 Sound Engineers photgraphed from the side looking at a mixing desk",
       title: "Tontechnik",
-      description: "Professionelle Tontechnik-Lösungen für Veranstaltungen, Studios und Installationen"
+      description: "Professionelle Tontechnik-Lösungen für Veranstaltungen und Studios"
     },
     {
       src: "/images/home/home-hero-3.jpg",
@@ -30,7 +30,6 @@ export default function Home() {
 
   // Logo carousel data
   const referenceLogos = [
-    { src: "/images/home/references-carousel/01099.png", alt: "01099" },
     { src: "/images/home/references-carousel/102boyz-1.png", alt: "102 Boyz" },
     { src: "/images/home/references-carousel/Korn_Logo_grey.png", alt: "Korn" },
     { src: "/images/home/references-carousel/SKIAGGU_SHADOW.png", alt: "Skiaggu" },
@@ -51,8 +50,7 @@ export default function Home() {
         showNavigation={true}
         showIndicators={true}
         ctaButtons={{
-          primary: { text: "Jetzt Mixing anfragen", href: "#contact" },
-          secondary: { text: "Get in Touch", href: "#contact" }
+          primary: { text: "Get in Touch", href: "#contact" }
         }}
       />
 
@@ -65,7 +63,7 @@ export default function Home() {
                 <img src="/icons/production.png" alt="Musikproduktion" className="w-16 h-16" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Musikproduktion</h3>
-              <p className="text-[var(--color-text-secondary)]">Professionelle Musikproduktion von der Aufnahme bis zum fertigen Track</p>
+              <p className="text-[var(--color-text-secondary)]">Professionelle Musikproduktion von der Aufnahme bis zum Release</p>
             </div>
             <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200">
               <div className="flex justify-center mb-4">
@@ -79,14 +77,14 @@ export default function Home() {
                 <img src="/icons/live.png" alt="Live-Tontechnik" className="w-16 h-16" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Live-Tontechnik</h3>
-              <p className="text-[var(--color-text-secondary)]">Professionelle Beschallung für Konzerte und Veranstaltungen</p>
+              <p className="text-[var(--color-text-secondary)]">Ausgewogener Klang mit Impact für Konzerte und Veranstaltungen</p>
             </div>
             <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200">
               <div className="flex justify-center mb-4">
                 <img src="/icons/workshops.png" alt="Workshops" className="w-16 h-16" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Workshops</h3>
-              <p className="text-[var(--color-text-secondary)]">Schulungen und Workshops für Tontechnik-Interessierte</p>
+              <p className="text-[var(--color-text-secondary)]">Workshops für Tontechnik-Interessierte</p>
             </div>
           </div>
         </div>
@@ -103,7 +101,7 @@ export default function Home() {
           <TestimonialSlider
             testimonials={testimonials}
             autoPlay={true}
-            autoPlayInterval={6000}
+            autoPlayInterval={8000}
             showNavigation={true}
             showIndicators={true}
           />
@@ -125,7 +123,7 @@ export default function Home() {
               <svg className="w-6 h-6 text-[var(--color-accent-blue)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
               </svg>
-              Outboard-Hardware & Logic Pro Expertise
+              Hardware, Ableton & Logic Pro Expertise
             </div>
             <div className="p-5 bg-[var(--color-primary-100)] rounded-xl mb-5 text-[var(--color-text-dark)] font-bold sm:min-w-[400px] w-full max-w-[400px] flex items-center gap-3">
               <svg className="w-6 h-6 text-[var(--color-accent-blue)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,7 +180,7 @@ export default function Home() {
             {/* Newsletter Text */}
             <div>
               <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">Sound-Insights & exklusive Angebote direkt in dein Postfach.</h3>
-            <p className="text-[var(--color-text-primary)]">Noch ein Newsletter? Dann miste doch mal aus und mach Platz für das, was dich weiterbringt. In meinem Newsletter bekommst du Branchen-Insights, Techniques und Tipps, wie du deine Karriere als Tontechniker und Produzent aufs nächste Level bringst. <span className="ml-1">→</span></p>
+            <p className="text-[var(--color-text-primary)]">Noch ein Newsletter? Dann miste doch mal aus und mach Platz für das, was dich weiterbringt. In meinem Newsletter bekommst du Branchen-Insights, Techniques und Tipps, wie du deine Karriere als Tontechniker und Produzent aufs nächste Level bringst. <strong>Plus: 20% Rabatt auf deine erste Mixing-Session!</strong> <span className="ml-1">→</span></p>
           </div>
           {/* Newsletter Signup */}
           <NewsletterForm />
@@ -201,7 +199,7 @@ export default function Home() {
               Equipment Verleih
             </h2>
             <p className="text-xl text-[var(--color-text-secondary)] max-w-3xl mx-auto">
-              Professionelle Tontechnik mieten - von Mikrofonen bis hin zu kompletten Beschallungsanlagen
+              Professionelle Audio Equipment und Backline für deine Produktion
             </p>
           </div>
 
@@ -231,9 +229,9 @@ export default function Home() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-[var(--color-text-primary)] font-semibold text-lg mb-2">Lautsprecher & Verstärker</h3>
+                    <h3 className="text-[var(--color-text-primary)] font-semibold text-lg mb-2">Audio Equipment</h3>
                     <p className="text-[var(--color-text-secondary)]">
-                      Professionelle PA-Systeme und Verstärker für Events jeder Größe
+                      Hochwertige Mikrofone, Preamps und Effektgeräte für professionelle Aufnahmen
                     </p>
                   </div>
                 </div>
@@ -245,9 +243,9 @@ export default function Home() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-[var(--color-text-primary)] font-semibold text-lg mb-2">Mischpulte & Interfaces</h3>
+                    <h3 className="text-[var(--color-text-primary)] font-semibold text-lg mb-2">Backline</h3>
                     <p className="text-[var(--color-text-secondary)]">
-                      Digitale und analoge Mischpulte sowie Audio-Interfaces für jeden Bedarf
+                      Instrumente und Zubehör für Live-Performances und Studio-Sessions
                     </p>
                   </div>
                 </div>
@@ -298,7 +296,7 @@ export default function Home() {
                 </h3>
                 
                 <p className="text-[var(--color-text-secondary)] mb-6">
-                  Durchstöbern Sie unser komplettes Equipment-Sortiment, wählen Sie Ihre Mietdauer und senden Sie uns direkt eine Anfrage.
+                  Durchstöbere unser komplettes Equipment-Sortiment, wähle deine Mietdauer und sende uns direkt eine Anfrage.
                 </p>
                 
                 <div className="space-y-3">

@@ -32,7 +32,7 @@ export default function TestimonialSlider({
       loop: true,
       align: 'start',
     },
-    autoPlay ? [Autoplay({ delay: autoPlayInterval, stopOnInteraction: false })] : []
+    autoPlay ? [Autoplay({ delay: autoPlayInterval, stopOnInteraction: false, stopOnMouseEnter: true })] : []
   );
 
   const scrollPrev = useCallback(() => {

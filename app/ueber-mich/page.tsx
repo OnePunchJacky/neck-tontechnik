@@ -36,7 +36,7 @@ export default function UeberMich() {
           </p>
 
           <p className="text-[var(--color-text-secondary)] mb-8">
-            In meiner Zeit als <strong className="text-[var(--color-text-primary)]">Tontechniker</strong> habe ich bereits mit Künstlern wie 102Boyz, Chris Norman, JuJu, Kool Savas und Ski Aggu an erfolgreichen Tourneen und Shows gearbeitet.
+            In meiner Zeit als <strong className="text-[var(--color-text-primary)]">Tontechniker</strong> habe ich bereits mit Künstlern wie 102Boyz, Chris Norman, JuJu, Kool Savas, Korn und Ski Aggu an erfolgreichen Tourneen und Shows gearbeitet.
           </p>
 
           <p className="text-[var(--color-text-secondary)] mb-8">

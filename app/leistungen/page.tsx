@@ -32,6 +32,9 @@ export default function Leistungen() {
                 <li className="font-bold mb-4 md:mb-6 text-left"><b>Mastering – Perfekte Balance für jede Plattform und jedes Medium: </b>
                   Der letzte Feinschliff für deinen Sound. Ich optimiere deinen Mix für jede Streaming-Plattform, CD oder Vinyl und sorge für eine stimmige Lautheit und erhalte dabei die Dynamik und Klangtiefe deiner Produktion.
                 </li>
+                <li className="font-bold mb-4 md:mb-6 text-left"><b>Mastering für Live Versionen: </b>
+                  Spezielle Optimierung deiner Tracks für Live-Performances. Ich sorge dafür, dass deine Musik auf großen PA-Systemen kraftvoll und definiert klingt, ohne dabei die Nuancen zu verlieren.
+                </li>
               </ul>
               <div className="flex justify-center lg:justify-start">
                 <a
@@ -82,13 +85,13 @@ export default function Leistungen() {
                 Ich sorge für einen professionellen Sound auf jeder Bühne – vom Clubgig bis zum Festival. Als Musiker kenne ich beide Seiten des Mischpults und weiß, worauf es ankommt.
               </h4>
               <ul className="list-disc mb-4 md:mb-6 text-left pl-4">
-                <li className="font-bold mb-4 md:mb-6 text-left"><b>Monitoring – Sicher auf der Bühne:</b>
+                <li className="font-bold mb-4 md:mb-6 text-left"><b>Monitoring – Sicher auf der Bühne: </b>
                   Als Musiker weiß ich, wie essentiell ein gutes Monitoring für eine souveräne Performance ist. Ich sorge für ein klares, gut abgestimmtes Monitorsystem – egal ob In-Ear oder Wedges – damit sich alle auf der Bühne sicher fühlen und ihre beste Show abliefern können.
                 </li>
-                <li className="font-bold mb-4 md:mb-6 text-left"><b>Front of House – Der perfekte Live-Sound:</b>
+                <li className="font-bold mb-4 md:mb-6 text-left"><b>Front of House – Der perfekte Live-Sound: </b>
                   Eine Liveshow muss nicht nur laut sein – sie muss Emotionen transportieren. Durch meine Erfahrung im Studio habe ich ein Gespür dafür, wie sich Musik auch live druckvoll, ausgewogen und detailreich auf das Publikum übertragen lässt.
                 </li>
-                <li className="font-bold mb-4 md:mb-6 text-left"><b>Stagetech/Backline:</b>
+                <li className="font-bold mb-4 md:mb-6 text-left"><b>Stagetech/Backline: </b>
                   Ein reibungsloser technischer Ablauf ist die Basis für eine starke Performance. Ich übernehme die komplette technische Planung für deine Show und kümmere mich um Bühnenverkabelung, Mikrofonierung, Backline Aufbau und Pflege. So läuft alles rund – vom ersten Ton bis zum letzten Applaus.
                 </li>
               </ul>
