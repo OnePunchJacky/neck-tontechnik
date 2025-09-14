@@ -1,5 +1,16 @@
+import { Metadata } from "next";
 import ContactFooter from '../components/ContactFooter';
 import ServiceAccordion from '../components/ServiceAccordion';
+
+export const metadata: Metadata = {
+  title: 'Leistungen',
+  description: 'Professionelle Tontechnik-Services in Leipzig: Mixing & Mastering, Musikproduktion und Live-Tontechnik. Erfahre mehr über meine Audio Engineering Dienstleistungen.',
+  openGraph: {
+    title: 'Leistungen - Neck Tontechnik',
+    description: 'Professionelle Tontechnik-Services: Mixing & Mastering, Musikproduktion und Live-Tontechnik für Künstler und Veranstaltungen.',
+    url: 'https://neck-tontechnik.com/leistungen',
+  }
+};
 
 export default function Leistungen() {
   const mixMasteringServices = [

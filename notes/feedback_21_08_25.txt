@@ -1,27 +1,33 @@
 Feedback:
- ⁃ Buttons und Iconhintergrund in "Brand-Color"
+ ? Buttons und Iconhintergrund in "Brand-Color"
 
 Startseite:
- ⁃ "Installationen" raus
- ⁃ Get in touch only
- ⁃ „Portfolio“ farblich ein bisschen hervorhebe (man scrolls drüber)
- ⁃ Musikproduktion: „bis zum release“
- ⁃ Live-Tontechnik: statt „professionell“ Vllt. "ausgewogener Klang mit Impact für…"
- ⁃ Workshops: „Schulungen“ raus
- ⁃ Testimonials switched zu schnell durch. Da vielleicht einen stopp Button hinzufügen oder langsamer. Man kann es sonst nicht lesen
- ⁃ Vielleicht "Hardware, Ableton & Logic Pro expertise" ⁃ 11099 logo raus. Dafür vielleicht RAR, Splash, Domiziana rein (logos suche ich noch raus bis Freitag)
- ⁃ Newsletter bekommen irgend ein goodie/rabatt
- ⁃ Equipment Verleih: Keine beschallungsanlagen Lautsprecher & Verstärker raus, Mischpulte und Interfaces Raus Vielleicht einfach Audio equipment, Backline
+ ✓ "Installationen" raus
+ ! Get in touch only: CTA sollten zum Text passen, daher habe ich es so belassen
+ ? „Portfolio" farblich ein bisschen hervorhebe (man scrolls drüber)
+ ✓ Musikproduktion: „bis zum release"
+ ✓ Live-Tontechnik: statt „professionell" Vllt. "ausgewogener Klang mit Impact für…"
+ ✓ Workshops: „Schulungen" raus
+ ✓ Testimonials switched zu schnell durch. Da vielleicht einen stopp Button hinzufügen oder langsamer. Man kann es sonst nicht lesen
+ ✓ Vielleicht "Hardware, Ableton & Logic Pro expertise" 
+ ✓ 11099 logo raus. Dafür vielleicht RAR, Splash, Domiziana rein (logos suche ich noch raus bis Freitag) - (11099 entfernt, warte auf neue Logos)
+ ✓ Newsletter bekommen irgend ein goodie/rabatt (20% Rabatt auf erste Mixing-Session)
+ ✓ Equipment Verleih: Keine beschallungsanlagen Lautsprecher & Verstärker raus, Mischpulte und Interfaces Raus Vielleicht einfach Audio equipment, Backline
 
 Leistungen:
- ⁃ Mastering noch "Mastering für Live Versionen" hinzufügen
- ⁃ Live: Hier fehlen nach den Doppelpunkten Leerzeichen
+ ✓ Mastering noch "Mastering für Live Versionen" hinzufügen
+ ✓ Live: Hier fehlen nach den Doppelpunkten Leerzeichen
+ ✓ ZUSÄTZLICH: Accordion-Layout für bessere Benutzerfreundlichkeit implementiert
 
 Referenzen (mach ich selbst)
  ⁃ musst du mir noch zeigen wie (vielleicht Freitag früh?)
 
 Über mich:
- ⁃ Korn mit in die Liste
+ ✓ Korn mit in die Liste
 
 Kontakt
- ⁃ vincent@neck-tontechnik.com statt info@ und Telefonnummer raus
+ ✓ vincent@neck-tontechnik.com statt info@ und Telefonnummer raus
+
+LAYOUT-VERBESSERUNGEN (ZUSÄTZLICH):
+ ✓ Textinhalt in Service-Karten zentriert (Startseite)
+ ✓ ServiceAccordion-Komponente für Leistungen-Seite erstellt

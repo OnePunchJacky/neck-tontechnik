@@ -1,9 +1,20 @@
+import { Metadata } from "next";
 import Hero from "./components/Hero";
 import TestimonialSlider from "./components/TestimonialSlider";
 import ContactFooter from "./components/ContactFooter";
 import NewsletterForm from "./components/NewsletterForm";
 import LogoCarousel from "./components/LogoCarousel";
 import testimonialsData from "../data/testimonials.json";
+
+export const metadata: Metadata = {
+  title: 'Startseite',
+  description: 'Neck Tontechnik - Dein Partner für professionelle Tontechnik in Leipzig. Mixing, Mastering, Live-Sound und Equipment-Verleih mit jahrelanger Erfahrung.',
+  openGraph: {
+    title: 'Neck Tontechnik - Professionelle Tontechnik & Musikproduktion',
+    description: 'Dein Partner für professionelle Tontechnik in Leipzig. Mixing, Mastering, Live-Sound und Equipment-Verleih mit jahrelanger Erfahrung.',
+    url: 'https://neck-tontechnik.com',
+  }
+};
 
 export default function Home() {
   // Example images for the Hero component

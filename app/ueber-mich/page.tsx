@@ -1,5 +1,16 @@
+import { Metadata } from "next";
 import Hero from "../components/Hero";
 import ContactFooter from "../components/ContactFooter";
+
+export const metadata: Metadata = {
+  title: 'Über mich',
+  description: 'Lerne Vincent von Neck Tontechnik kennen - Tontechniker und Musikproduzent aus Leipzig mit Erfahrung in Live-Sound, Studio-Produktion und Audio Engineering.',
+  openGraph: {
+    title: 'Über mich - Vincent, Neck Tontechnik',
+    description: 'Lerne Vincent kennen - Tontechniker und Musikproduzent aus Leipzig mit Erfahrung in Live-Sound und Studio-Produktion.',
+    url: 'https://neck-tontechnik.com/ueber-mich',
+  }
+};
 
 export default function UeberMich() {
   const heroImage = {

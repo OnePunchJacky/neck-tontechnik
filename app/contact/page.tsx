@@ -1,4 +1,15 @@
+import { Metadata } from "next";
 import ContactForm from '../components/ContactForm';
+
+export const metadata: Metadata = {
+  title: 'Kontakt',
+  description: 'Kontaktiere Vincent von Neck Tontechnik für dein nächstes Audio-Projekt. Mixing, Mastering, Live-Sound und Equipment-Verleih in Leipzig.',
+  openGraph: {
+    title: 'Kontakt - Neck Tontechnik',
+    description: 'Kontaktiere Vincent für dein nächstes Audio-Projekt. Professionelle Tontechnik-Services in Leipzig.',
+    url: 'https://neck-tontechnik.com/contact',
+  }
+};
 
 export default function ContactPage() {
   return (

@@ -1,4 +1,15 @@
+import { Metadata } from "next";
 import ContactFooter from '../components/ContactFooter';
+
+export const metadata: Metadata = {
+  title: 'Referenzen',
+  description: 'Portfolio und Referenzen von Neck Tontechnik Leipzig: Erfolgreich umgesetzte Projekte in Mixing, Mastering und Live-Tontechnik.',
+  openGraph: {
+    title: 'Referenzen - Neck Tontechnik',
+    description: 'Portfolio und Referenzen: Erfolgreich umgesetzte Projekte in Mixing, Mastering und Live-Tontechnik.',
+    url: 'https://neck-tontechnik.com/referenzen',
+  }
+};
 
 export default function Referenzen() {
   return (
@@ -11,7 +22,7 @@ export default function Referenzen() {
               Referenzen
             </h1>
             <p className="text-xl text-[var(--color-text-secondary)] max-w-3xl mx-auto">
-              Erfolgreich umgesetzte Projekte und zufriedene Kunden - ein Überblick über unsere Arbeit
+              Erfolgreich umgesetzte Projekte und zufriedene Kunden - ein Überblick über meine Arbeit
             </p>
           </div>
         </div>
