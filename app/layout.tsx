@@ -7,7 +7,7 @@ import StandardFooter from "./components/StandardFooter";
 export const metadata: Metadata = {
   metadataBase: new URL('https://neck-tontechnik.com'),
   title: {
-    default: 'Neck Tontechnik - Professionelle Tontechnik & Musikproduktion',
+    default: 'Neck Tontechnik Leipzig - Mixing, Mastering & Live-Sound',
     template: '%s | Neck Tontechnik'
   },
   description: 'Professionelle Tontechnik-Lösungen in Leipzig: Mixing, Mastering, Live-Sound & Equipment-Verleih. Mit Expertise in Hardware, Ableton & Logic Pro.',

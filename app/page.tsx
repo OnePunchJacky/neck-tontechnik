@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Image from "next/image";
 import Hero from "./components/Hero";
 import TestimonialSlider from "./components/TestimonialSlider";
 import ContactFooter from "./components/ContactFooter";
@@ -70,28 +71,28 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
             <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200 text-center">
               <div className="flex justify-center mb-4">
-                <img src="/icons/production.png" alt="Musikproduktion" className="w-16 h-16" />
+                <Image src="/icons/production.png" alt="Musikproduktion" width={64} height={64} className="w-16 h-16" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Musikproduktion</h3>
               <p className="text-[var(--color-text-secondary)]">Professionelle Musikproduktion von der Aufnahme bis zum Release</p>
             </div>
             <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200 text-center">
               <div className="flex justify-center mb-4">
-                <img src="/icons/mixing_mastering.png" alt="Mixing & Mastering" className="w-16 h-16" />
+                <Image src="/icons/mixing_mastering.png" alt="Mixing & Mastering" width={64} height={64} className="w-16 h-16" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Mixing & Mastering</h3>
               <p className="text-[var(--color-text-secondary)]">Hochwertiges Mixing und Mastering für optimale Klangqualität</p>
             </div>
             <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200 text-center">
               <div className="flex justify-center mb-4">
-                <img src="/icons/live.png" alt="Live-Tontechnik" className="w-16 h-16" />
+                <Image src="/icons/live.png" alt="Live-Tontechnik" width={64} height={64} className="w-16 h-16" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Live-Tontechnik</h3>
               <p className="text-[var(--color-text-secondary)]">Ausgewogener Klang mit Impact für Konzerte und Veranstaltungen</p>
             </div>
             <div className="p-5 bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-surface-light)] transition-colors duration-200 text-center">
               <div className="flex justify-center mb-4">
-                <img src="/icons/workshops.png" alt="Workshops" className="w-16 h-16" />
+                <Image src="/icons/workshops.png" alt="Workshops" width={64} height={64} className="w-16 h-16" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-4">Workshops</h3>
               <p className="text-[var(--color-text-secondary)]">Workshops für Tontechnik-Interessierte</p>
@@ -188,9 +189,9 @@ export default function Home() {
         </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             {/* Newsletter Text */}
-            <div>
-              <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">Sound-Insights & exklusive Angebote direkt in dein Postfach.</h3>
-            <p className="text-[var(--color-text-primary)]">Noch ein Newsletter? Dann miste doch mal aus und mach Platz für das, was dich weiterbringt. In meinem Newsletter bekommst du Branchen-Insights, Techniques und Tipps, wie du deine Karriere als Tontechniker und Produzent aufs nächste Level bringst. <strong>Plus: 20% Rabatt auf deine erste Mixing-Session!</strong> <span className="ml-1">→</span></p>
+            <div className="p-6">
+              <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-4">Sound-Insights & exklusive Angebote direkt in dein Postfach.</h3>
+            <p className="text-[var(--color-text-primary)] leading-relaxed">Noch ein Newsletter? Dann miste doch mal aus und mach Platz für das, was dich weiterbringt. In meinem Newsletter bekommst du Branchen-Insights, Techniques und Tipps, wie du deine Karriere als Tontechniker und Produzent aufs nächste Level bringst. <strong>Plus: 20% Rabatt auf deine erste Mixing-Session!</strong> <span className="ml-1">→</span></p>
           </div>
           {/* Newsletter Signup */}
           <NewsletterForm />
