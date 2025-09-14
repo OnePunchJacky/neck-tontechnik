@@ -7,7 +7,6 @@ import LogoCarousel from "./components/LogoCarousel";
 import testimonialsData from "../data/testimonials.json";
 
 export const metadata: Metadata = {
-  title: 'Startseite',
   description: 'Neck Tontechnik - Dein Partner für professionelle Tontechnik in Leipzig. Mixing, Mastering, Live-Sound und Equipment-Verleih mit jahrelanger Erfahrung.',
   openGraph: {
     title: 'Neck Tontechnik - Professionelle Tontechnik & Musikproduktion',
