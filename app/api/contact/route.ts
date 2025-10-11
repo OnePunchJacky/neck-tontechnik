@@ -48,6 +48,10 @@ export async function POST(request: NextRequest) {
             email: 'vincent@neck-tontechnik.com',
             name: 'Vincent Neck',
           },
+          {
+            email: 'torben.jaeckel@gmail.com',
+            name: 'Torben Jäckel',
+          },
         ],
         replyTo: {
           email: email,
