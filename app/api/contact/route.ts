@@ -6,13 +6,24 @@ const contactSchema = z.object({
   name: z.string().min(1, 'Name ist erforderlich'),
   email: z.string().email('Ungültige E-Mail-Adresse'),
   message: z.string().min(1, 'Nachricht ist erforderlich'),
+  website: z.string().optional(), // Honeypot field
 });
 
 export async function POST(request: NextRequest) {
   try {
     // Parse and validate request body
     const body = await request.json();
-    const { name, email, message } = contactSchema.parse(body);
+    const { name, email, message, website } = contactSchema.parse(body);
+
+    // Honeypot check - if the website field is filled, it's likely spam
+    // Return success to fool the bot, but don't actually send the email
+    if (website && website.trim() !== '') {
+      console.log('Spam detected via honeypot field');
+      return NextResponse.json(
+        { message: 'Nachricht erfolgreich gesendet!' },
+        { status: 200 }
+      );
+    }
 
     // Check for API key
     const apiKey = process.env.BREVO_API_KEY;
