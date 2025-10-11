@@ -32,7 +32,7 @@ export default function Impressum() {
           <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-4">Kontakt</h2>
           <div className="mb-8">
             <p className="mb-2">
-              <strong className="text-[var(--color-text-primary)]">E-Mail:</strong> vincent@neck-tontechnik.com
+              <strong className="text-[var(--color-text-primary)]">E-Mail:</strong> vincent[at]neck-tontechnik.com
             </p>
           </div>
 
