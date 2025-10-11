@@ -122,8 +122,9 @@ export default function Home() {
       {/* Features Highlights Section */}
       <section className="py-16 md:py-20 px-4 md:px-8 min-h-[80vh] flex items-center">
         <div className="lg:columns-2 gap-8 text-[var(--color-text-primary)] max-w-7xl mx-auto w-full">
-          <div className="h-100 flex flex-col justify-center bg-[var(--color-surface)] p-5 rounded-xl"><h4 className="text-2xl mb-4 font-bold">Technik trifft musikalische Leidenschaft</h4><p>Ich bin nicht nur Tontechniker, sondern auch Multiinstrumentalist. Das gibt mir den ganzheitlichen Blick für einen Sound, der nicht nur technisch einwandfrei, sondern auch musikalisch überzeugt.</p><p className="mt-6 text-xl font-bold">Bei mir bekommt ihr →</p></div>
+          <div className="h-100 flex flex-col justify-center bg-[var(--color-surface)] p-5 rounded-xl"><h4 className="text-2xl mb-4 font-bold">Technik trifft musikalische Leidenschaft</h4><p>Ich bin nicht nur Tontechniker, sondern auch Multiinstrumentalist. Das gibt mir den ganzheitlichen Blick für einen Sound, der nicht nur technisch einwandfrei, sondern auch musikalisch überzeugt.</p></div>
           <div className="h-100 flex flex-col justify-center sm:items-center items-center">
+            <h5 className="text-xl font-bold mb-6 text-center">Bei mir bekommt ihr</h5>
             <div className="p-5 bg-[var(--color-primary-100)] rounded-xl mb-5 text-[var(--color-text-dark)] font-bold sm:min-w-[400px] w-full max-w-[400px] flex items-center gap-3">
               <svg className="w-6 h-6 text-[var(--color-accent-blue)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
