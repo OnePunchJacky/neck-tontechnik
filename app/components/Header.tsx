@@ -136,15 +136,17 @@ export default function Header() {
                   </div>
                 )}
               </div>
-              
-              <Link 
-                href="/equipment-verleih" 
+
+              {/* Equipment Verleih - Hidden until fully implemented
+              <Link
+                href="/equipment-verleih"
                 className="text-[var(--color-text-primary)] hover:text-[var(--color-primary-200)] px-3 py-2 text-sm font-medium transition-colors duration-200"
                 onClick={closeDropdowns}
               >
                 Equipment Verleih
               </Link>
-              
+              */}
+
               <Link 
                 href="/ueber-mich" 
                 className="text-[var(--color-text-primary)] hover:text-[var(--color-primary-200)] px-3 py-2 text-sm font-medium transition-colors duration-200"
@@ -260,7 +262,8 @@ export default function Header() {
                     </div>
                   )}
                 </div>
-                
+
+                {/* Equipment Verleih - Hidden until fully implemented
                 <Link
                   href="/equipment-verleih"
                   className="animate-stagger-item animate-stagger-4 text-3xl font-bold text-[var(--color-text-primary)] hover:text-[var(--color-primary-200)] transition-colors duration-300"
@@ -268,10 +271,11 @@ export default function Header() {
                 >
                   Equipment Verleih
                 </Link>
-                
+                */}
+
                 <Link
                   href="/ueber-mich"
-                  className="animate-stagger-item animate-stagger-5 text-3xl font-bold text-[var(--color-text-primary)] hover:text-[var(--color-primary-200)] transition-colors duration-300"
+                  className="animate-stagger-item animate-stagger-4 text-3xl font-bold text-[var(--color-text-primary)] hover:text-[var(--color-primary-200)] transition-colors duration-300"
                   onClick={closeMenu}
                 >
                   Über Mich

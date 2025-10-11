@@ -199,12 +199,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Equipment Rental Section */}
+      {/* Equipment Rental Section - Hidden until fully implemented
       <section className="relative py-16 md:py-20 overflow-hidden min-h-[80vh] flex items-center">
         <div className="absolute inset-0 z-0 bg-[url('/images/equipment-rack.jpg')] bg-cover bg-center bg-fixed opacity-30"></div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 w-full">
-          
-          {/* Section Header */}
+
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] mb-6">
               Equipment Verleih
@@ -215,8 +214,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            
-            {/* Left Content */}
+
             <div className="space-y-8">
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
@@ -293,7 +291,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Content - CTA */}
             <div className="text-center lg:text-left">
               <div className="bg-[var(--color-primary)] bg-opacity-90 backdrop-blur-sm rounded-xl p-8 text-[var(--color-text-primary)]">
                 <div className="mb-6">
@@ -301,15 +298,15 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13h10M9 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM20.5 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                   </svg>
                 </div>
-                
+
                 <h3 className="text-2xl font-bold mb-4">
                   Equipment online mieten
                 </h3>
-                
+
                 <p className="text-[var(--color-text-secondary)] mb-6">
                   Durchstöbere mein komplettes Equipment-Sortiment, wähle deine Mietdauer und sende mir direkt eine Anfrage.
                 </p>
-                
+
                 <div className="space-y-3">
                   <div className="flex items-center justify-center lg:justify-start space-x-2 text-[var(--color-text-secondary)]">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,14 +314,14 @@ export default function Home() {
                     </svg>
                     <span className="text-sm">Verfügbarkeit in Echtzeit prüfen</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-center lg:justify-start space-x-2 text-[var(--color-text-secondary)]">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
                     <span className="text-sm">Automatische Preisberechnung</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-center lg:justify-start space-x-2 text-[var(--color-text-secondary)]">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -332,7 +329,7 @@ export default function Home() {
                     <span className="text-sm">Direkte Anfrage per E-Mail</span>
                   </div>
                 </div>
-                
+
                 <div className="mt-8">
                   <a
                     href="/equipment-verleih"
@@ -346,6 +343,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      */}
 
       {/* Contact Section */}
       <ContactFooter />
