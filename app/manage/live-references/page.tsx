@@ -22,7 +22,15 @@ export default function LiveReferencesPage() {
     location: '',
     bild: '',
     year: '',
+    stage: '',
+    category: [] as string[],
   });
+  // Category choices for live references
+  const categoryOptions = [
+    { value: 'Front Of House', label: 'Front Of House' },
+    { value: 'Stagetech', label: 'Stagetech' },
+    { value: 'Monitor', label: 'Monitor' },
+  ];
 
   useEffect(() => {
     if (references.length === 0 && !loading.liveReferences) {
@@ -30,18 +38,39 @@ export default function LiveReferencesPage() {
     }
   }, [references.length, loading.liveReferences, refreshLiveReferences]);
 
+  // Helper function to decode HTML entities and strip HTML tags
+  const decodeHtmlContent = (html: string): string => {
+    if (!html) return '';
+    // Create a temporary div to decode HTML entities
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = html;
+    const decoded = textarea.value;
+    // Strip HTML tags
+    return decoded.replace(/<[^>]*>/g, '').trim();
+  };
+
   const handleEdit = (reference: WPLiveReference) => {
     setFormData({
       title: reference.title.rendered || '',
-      content: reference.content.rendered || '',
+      content: decodeHtmlContent(reference.content.rendered || ''),
       status: reference.status,
     });
     
-    // Read ACF fields (location, bild, year)
+    // Read ACF fields (location, bild, year, stage, category)
+    // Category can be a string or array from WordPress
+    const categoryValue = reference.acf?.category;
+    const categoryArray = Array.isArray(categoryValue) 
+      ? categoryValue 
+      : categoryValue 
+        ? [String(categoryValue)] 
+        : [];
+    
     setAcfFields({
       location: String(reference.acf?.location || ''),
       bild: String(reference.acf?.bild || ''),
       year: String(reference.acf?.year || ''),
+      stage: String(reference.acf?.stage || ''),
+      category: categoryArray,
     });
     setEditingId(reference.id);
     setShowForm(true);
@@ -76,12 +105,21 @@ export default function LiveReferencesPage() {
         status: formData.status,
       };
 
-      // ACF fields: location, bild, year
-      payload.acf = {
+      // ACF fields: location, bild, year, stage, category
+      // Build ACF object and filter out only empty arrays (for category)
+      const acfData: Record<string, any> = {
         location: acfFields.location || '',
         bild: acfFields.bild && acfFields.bild.trim() ? (acfFields.bild.startsWith('http') ? acfFields.bild : (isNaN(parseInt(acfFields.bild)) ? null : parseInt(acfFields.bild))) : null,
         year: acfFields.year || '',
+        stage: acfFields.stage || '',
       };
+      
+      // Only include category if it has values (don't send empty array)
+      if (Array.isArray(acfFields.category) && acfFields.category.length > 0) {
+        acfData.category = acfFields.category;
+      }
+      
+      payload.acf = acfData;
 
       const url = editingId
         ? `/api/wp/live-references/${editingId}`
@@ -102,6 +140,8 @@ export default function LiveReferencesPage() {
           location: '',
           bild: '',
           year: '',
+          stage: '',
+          category: [],
         });
         refreshLiveReferences();
       } else {
@@ -241,6 +281,56 @@ export default function LiveReferencesPage() {
               value={acfFields.year}
               onChange={(value) => setAcfFields({ ...acfFields, year: value })}
             />
+
+            <FormField
+              label="Stage"
+              name="stage"
+              value={acfFields.stage}
+              onChange={(value) => setAcfFields({ ...acfFields, stage: value })}
+            />
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+                Category
+              </label>
+              <div className="space-y-2">
+                {categoryOptions.map((option) => {
+                  const isChecked = Array.isArray(acfFields.category) && acfFields.category.includes(option.value);
+                  return (
+                    <label
+                      key={option.value}
+                      className="flex items-center gap-2 cursor-pointer hover:opacity-80"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const currentCategories = Array.isArray(acfFields.category) ? acfFields.category : [];
+                          if (e.target.checked) {
+                            setAcfFields({
+                              ...acfFields,
+                              category: [...currentCategories, option.value],
+                            });
+                          } else {
+                            setAcfFields({
+                              ...acfFields,
+                              category: currentCategories.filter((cat) => cat !== option.value),
+                            });
+                          }
+                        }}
+                        className="w-4 h-4 text-[var(--color-primary)] bg-[var(--color-surface-light)] border-[var(--color-border)] rounded focus:ring-2 focus:ring-[var(--color-primary)]"
+                      />
+                      <span className="text-[var(--color-text-primary)]">{option.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              {Array.isArray(acfFields.category) && acfFields.category.length > 0 && (
+                <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+                  {acfFields.category.length} ausgewählt
+                </p>
+              )}
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">

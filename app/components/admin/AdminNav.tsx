@@ -14,6 +14,7 @@ import {
   Image as ImageIcon,
   Menu,
   LogOut,
+  UserCog,
 } from 'lucide-react';
 
 const navItems = [
@@ -25,6 +26,7 @@ const navItems = [
   { href: '/manage/equipment', label: 'Equipment', icon: Settings },
   { href: '/manage/artists', label: 'Artists', icon: Users },
   { href: '/manage/media', label: 'Media Library', icon: ImageIcon },
+  { href: '/manage/settings', label: 'Einstellungen', icon: UserCog },
 ];
 
 export default function AdminNav() {

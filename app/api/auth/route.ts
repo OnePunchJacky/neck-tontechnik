@@ -14,12 +14,26 @@ export async function POST(request: NextRequest) {
     const { username, password } = loginSchema.parse(body);
 
     const wpApi = new WordPressAPI();
-    const authResult = await wpApi.verifyCredentials(username, password);
+    let authResult;
+    
+    try {
+      authResult = await wpApi.verifyCredentials(username, password);
+    } catch (error: any) {
+      // Check if WordPress specifically requires application password
+      if (error.message === 'APPLICATION_PASSWORD_REQUIRED') {
+        return NextResponse.json(
+          { error: 'Diese WordPress-Installation erfordert ein Application Password. Bitte erstelle eines in WordPress (Benutzer → Profil → Application Passwords) und verwende es hier.' },
+          { status: 401 }
+        );
+      }
+      // Other errors will be handled below
+      authResult = null;
+    }
 
     if (!authResult) {
       console.error('Authentication failed for user:', username);
       return NextResponse.json(
-        { error: 'Ungültige Anmeldedaten. Bitte überprüfe deine Anmeldedaten oder verwende ein Application Password.' },
+        { error: 'Ungültige Anmeldedaten. Bitte überprüfe deine Anmeldedaten. Falls deine WordPress-Installation Application Passwords erfordert, verwende bitte ein Application Password.' },
         { status: 401 }
       );
     }

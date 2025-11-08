@@ -95,7 +95,7 @@ function LoginForm() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                Application Password
+                Passwort
               </label>
               <input
                 id="password"
@@ -105,10 +105,10 @@ function LoginForm() {
                 required
                 className="w-full px-4 py-2 bg-[var(--color-surface-light)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                 autoComplete="current-password"
-                placeholder="WordPress Application Password"
+                placeholder="WordPress Passwort oder Application Password"
               />
               <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                Verwende ein Application Password aus WordPress (Benutzer → Profil → Application Passwords)
+                Du kannst dein normales WordPress-Passwort oder ein Application Password verwenden. Falls deine WordPress-Installation Application Passwords erfordert, erstelle eines in WordPress (Benutzer → Profil → Application Passwords).
               </p>
             </div>
 

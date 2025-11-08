@@ -15,6 +15,8 @@ interface WPLiveReference {
     location?: string;
     bild?: number | string;
     year?: string;
+    stage?: string;
+    category?: string | string[];
   };
   _embedded?: {
     'wp:term'?: Array<Array<{
@@ -129,14 +131,38 @@ function getCategoryColor(categoryName: string): string {
 }
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '');
+  if (!html) return '';
+  // Decode HTML entities and strip HTML tags
+  // Use browser's built-in decoding if available, otherwise fallback to regex
+  if (typeof document !== 'undefined') {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = html;
+    const decoded = textarea.value;
+    return decoded.replace(/<[^>]*>/g, '').trim();
+  }
+  // Fallback for SSR or when document is not available
+  // Basic entity decoding
+  let decoded = html
+    .replace(/&#038;/g, '&')
+    .replace(/&#8211;/g, '–')
+    .replace(/&#8212;/g, '—')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+  return decoded.replace(/<[^>]*>/g, '').trim();
 }
 
 export default function LiveReferencesPage() {
   const [references, setReferences] = useState<(WPLiveReference & { featuredImage?: WPMedia })[]>([]);
   const [filteredReferences, setFilteredReferences] = useState<(WPLiveReference & { featuredImage?: WPMedia })[]>([]);
   const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+
+  // Available ACF categories
+  const acfCategories = ['Front Of House', 'Stagetech', 'Monitor'];
 
   useEffect(() => {
     async function fetchReferences() {
@@ -149,19 +175,34 @@ export default function LiveReferencesPage() {
   }, []);
 
   useEffect(() => {
-    if (activeFilter === 'all') {
-      setFilteredReferences(references);
-    } else {
-      const filtered = references.filter(reference => {
+    let filtered = references;
+
+    // Filter by ACF category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(reference => {
+        const categories = reference.acf?.category;
+        if (Array.isArray(categories)) {
+          return categories.includes(selectedCategory);
+        } else if (typeof categories === 'string') {
+          return categories === selectedCategory;
+        }
+        return false;
+      });
+    }
+
+    // Filter by WordPress categories (legacy support)
+    if (activeFilter !== 'all') {
+      filtered = filtered.filter(reference => {
         const categories = reference._embedded?.['wp:term']?.[0] || [];
         return categories.some(cat => cat.slug === activeFilter);
       });
-      setFilteredReferences(filtered);
     }
-  }, [activeFilter, references]);
 
-  // Get unique categories for filter buttons
-  const getCategories = () => {
+    setFilteredReferences(filtered);
+  }, [activeFilter, selectedCategory, references]);
+
+  // Get unique WordPress categories for filter buttons (legacy)
+  const getWordPressCategories = () => {
     const categorySet = new Set<string>();
     references.forEach(reference => {
       const categories = reference._embedded?.['wp:term']?.[0] || [];
@@ -170,23 +211,21 @@ export default function LiveReferencesPage() {
     return Array.from(categorySet);
   };
 
-  // Count references per category
-  const getCategoryCount = (categorySlug: string) => {
-    if (categorySlug === 'all') return references.length;
+  // Count references per ACF category
+  const getACFCategoryCount = (category: string) => {
+    if (category === 'all') return references.length;
     return references.filter(reference => {
-      const categories = reference._embedded?.['wp:term']?.[0] || [];
-      return categories.some(cat => cat.slug === categorySlug);
+      const categories = reference.acf?.category;
+      if (Array.isArray(categories)) {
+        return categories.includes(category);
+      } else if (typeof categories === 'string') {
+        return categories === category;
+      }
+      return false;
     }).length;
   };
 
-  const categories = getCategories();
-  const filterButtons = [
-    { label: 'Alle Events', value: 'all' },
-    ...categories.map(cat => ({
-      label: cat.charAt(0).toUpperCase() + cat.slice(1),
-      value: cat
-    }))
-  ];
+  const wpCategories = getWordPressCategories();
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
@@ -203,31 +242,39 @@ export default function LiveReferencesPage() {
         </div>
       </section>
 
-      {/* Filter Tabs */}
-      {categories.length > 0 && (
-        <section className="sticky top-0 z-40 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex space-x-8 overflow-x-auto py-4">
-              {filterButtons.map((filter) => (
+      {/* Filter Bar */}
+      <section className="sticky top-0 z-40 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-4">
+            <h3 className="text-sm font-medium text-[var(--color-text-secondary)] mb-3">Filter nach Kategorie:</h3>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedCategory === 'all'
+                    ? 'bg-[var(--color-primary)] text-white'
+                    : 'bg-[var(--color-surface-light)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] border border-[var(--color-border)]'
+                }`}
+              >
+                Alle ({references.length})
+              </button>
+              {acfCategories.map((category) => (
                 <button
-                  key={filter.value}
-                  onClick={() => setActiveFilter(filter.value)}
-                  className={`font-medium whitespace-nowrap pb-2 border-b-2 transition-colors ${
-                    activeFilter === filter.value
-                      ? 'text-[var(--color-text-primary)] border-[var(--color-accent-blue)]'
-                      : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] border-transparent hover:border-[var(--color-text-muted)]'
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    selectedCategory === category
+                      ? 'bg-[var(--color-primary)] text-white'
+                      : 'bg-[var(--color-surface-light)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] border border-[var(--color-border)]'
                   }`}
                 >
-                  {filter.label}
-                  <span className="ml-2 text-sm opacity-60">
-                    ({getCategoryCount(filter.value)})
-                  </span>
+                  {category} ({getACFCategoryCount(category)})
                 </button>
               ))}
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* References Grid */}
       <section className="py-16">
@@ -245,9 +292,9 @@ export default function LiveReferencesPage() {
           ) : filteredReferences.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-[var(--color-text-muted)] text-lg">
-                {activeFilter === 'all' 
+                {selectedCategory === 'all' 
                   ? 'Keine Live-Referenzen gefunden.' 
-                  : `Keine Referenzen in der Kategorie "${filterButtons.find(f => f.value === activeFilter)?.label}" gefunden.`
+                  : `Keine Referenzen in der Kategorie "${selectedCategory}" gefunden.`
                 }
               </p>
             </div>
@@ -287,26 +334,31 @@ export default function LiveReferencesPage() {
                     
                     {/* Content */}
                     <div className="p-6">
-                      {/* Categories */}
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {categories.map((category) => (
-                          <span
-                            key={category.id}
-                            className={`text-xs font-medium px-2.5 py-0.5 rounded ${getCategoryColor(category.name)}`}
-                          >
-                            {category.name}
-                          </span>
-                        ))}
-                      </div>
+                      {/* ACF Categories */}
+                      {reference.acf?.category && (
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {(Array.isArray(reference.acf.category) 
+                            ? reference.acf.category 
+                            : [reference.acf.category]
+                          ).map((category, index) => (
+                            <span
+                              key={index}
+                              className="text-xs font-medium px-2.5 py-0.5 rounded bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20"
+                            >
+                              {category}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       
                       {/* Title */}
                       <h3 className="text-xl font-semibold text-[var(--color-text-primary)] mb-2 line-clamp-2 group-hover:text-[var(--color-accent-blue)] transition-colors">
                         {reference.title.rendered}
                       </h3>
                       
-                      {/* Location & Year */}
-                      {(reference.acf?.location || reference.acf?.year) && (
-                        <div className="text-[var(--color-text-muted)] text-sm mb-3">
+                      {/* Location, Year & Stage */}
+                      {(reference.acf?.location || reference.acf?.year || reference.acf?.stage) && (
+                        <div className="text-[var(--color-text-muted)] text-sm mb-3 space-y-1">
                           {reference.acf?.location && (
                             <div className="flex items-center gap-1">
                               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,11 +369,19 @@ export default function LiveReferencesPage() {
                             </div>
                           )}
                           {reference.acf?.year && (
-                            <div className="flex items-center gap-1 mt-1">
+                            <div className="flex items-center gap-1">
                               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
                               {reference.acf.year}
+                            </div>
+                          )}
+                          {reference.acf?.stage && (
+                            <div className="flex items-center gap-1">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                              </svg>
+                              {reference.acf.stage}
                             </div>
                           )}
                         </div>

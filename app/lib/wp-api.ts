@@ -28,7 +28,40 @@ export class WordPressAPI {
   }
 
   // Authentication
+  // Tries to authenticate with the provided password (can be regular password or application password)
+  // First tries custom endpoint for regular passwords, then falls back to standard REST API for application passwords
   async verifyCredentials(username: string, password: string): Promise<{ user: any; token: string } | null> {
+    const baseUrl = WORDPRESS_API_URL.replace('/wp/v2', '');
+    
+    // First, try custom endpoint for regular password authentication
+    try {
+      const customAuthResponse = await axios.post(
+        `${baseUrl}/neck-tontechnik/v1/auth/login`,
+        {
+          username,
+          password,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (customAuthResponse.data && customAuthResponse.data.success && customAuthResponse.data.user) {
+        // Custom endpoint succeeded - regular password worked
+        return {
+          user: customAuthResponse.data.user,
+          token: customAuthResponse.data.token,
+        };
+      }
+    } catch (customError: any) {
+      // Custom endpoint failed - might be application password or invalid credentials
+      // Continue to try standard REST API endpoint
+      console.log('Custom auth endpoint failed, trying standard REST API...', customError.response?.status);
+    }
+
+    // Fallback: Try standard WordPress REST API endpoint (for application passwords)
     try {
       const token = Buffer.from(`${username}:${password}`).toString('base64');
       const response = await axios.get(`${WORDPRESS_API_URL}/users/me`, {
@@ -47,15 +80,33 @@ export class WordPressAPI {
     } catch (error: any) {
       // Log detailed error for debugging
       if (error.response) {
-        console.error('WordPress auth error response:', {
-          status: error.response.status,
+        const status = error.response.status;
+        const errorData = error.response.data;
+        
+        console.error('WordPress REST API auth error response:', {
+          status,
           statusText: error.response.statusText,
-          data: error.response.data,
+          data: errorData,
         });
+        
+        // Check if it's specifically an application password requirement
+        const errorMessage = errorData?.message || errorData?.error || '';
+        if (status === 401 || status === 403) {
+          // Check if WordPress is specifically asking for application password
+          if (errorMessage.toLowerCase().includes('application password') || 
+              errorMessage.toLowerCase().includes('application_password')) {
+            throw new Error('APPLICATION_PASSWORD_REQUIRED');
+          }
+        }
       } else if (error.request) {
         console.error('WordPress auth error - no response:', error.request);
       } else {
         console.error('WordPress auth error:', error.message);
+      }
+      
+      // Re-throw APPLICATION_PASSWORD_REQUIRED, otherwise return null
+      if (error.message === 'APPLICATION_PASSWORD_REQUIRED') {
+        throw error;
       }
       return null;
     }
@@ -295,6 +346,41 @@ export class WordPressAPI {
       console.error('Error getting option from meta:', error);
       return null;
     }
+  }
+
+  // Application Password Management
+  async getApplicationPasswords() {
+    const baseUrl = WORDPRESS_API_URL.replace('/wp/v2', '');
+    const response = await this.client.get(`${baseUrl}/users/me/application-passwords`);
+    return response.data;
+  }
+
+  async createApplicationPassword(name: string) {
+    const baseUrl = WORDPRESS_API_URL.replace('/wp/v2', '');
+    const response = await this.client.post(`${baseUrl}/users/me/application-passwords`, {
+      name,
+    });
+    return response.data;
+  }
+
+  async revokeApplicationPassword(uuid: string) {
+    const baseUrl = WORDPRESS_API_URL.replace('/wp/v2', '');
+    const response = await this.client.delete(`${baseUrl}/users/me/application-passwords/${uuid}`);
+    return response.data;
+  }
+
+  // Change user password
+  // Note: WordPress REST API may require current password verification
+  async changePassword(newPassword: string, currentPassword?: string) {
+    const payload: any = {
+      password: newPassword,
+    };
+    // Some WordPress setups require current password for verification
+    if (currentPassword) {
+      payload.current_password = currentPassword;
+    }
+    const response = await this.client.post('/users/me', payload);
+    return response.data;
   }
 }
 

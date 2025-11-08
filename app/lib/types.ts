@@ -78,6 +78,8 @@ export interface WPLiveReference {
     location?: string;
     bild?: number | string;
     year?: string;
+    stage?: string;
+    category?: string | string[];
   };
   _links: Record<string, any>;
 }

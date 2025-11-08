@@ -40,8 +40,9 @@ export async function PUT(
     
     // Update the post with all data including ACF fields
     // ACF fields should be sent directly in the 'acf' object
+    // Only include acf if it exists and has at least one field
     const updatePayload = { ...postData };
-    if (acf && Object.keys(acf).length > 0) {
+    if (acf && typeof acf === 'object' && Object.keys(acf).length > 0) {
       updatePayload.acf = acf;
       console.log('Updating live reference with ACF fields:', acf);
     }
