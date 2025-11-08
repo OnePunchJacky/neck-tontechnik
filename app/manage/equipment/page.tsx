@@ -45,8 +45,8 @@ export default function EquipmentPage() {
 
   const handleEdit = (item: WPEquipment) => {
     setFormData({
-      title: item.title?.rendered || item.title || '',
-      content: item.content?.rendered || item.content || '',
+      title: typeof item.title === 'string' ? item.title : item.title?.rendered || '',
+      content: typeof item.content === 'string' ? item.content : item.content?.rendered || '',
       status: item.status,
       featured_media: String(item.featured_media || ''),
     });
@@ -168,7 +168,7 @@ export default function EquipmentPage() {
   };
 
   const handleRentalUpdate = (updated: WPEquipment) => {
-    setEquipment(equipment.map((eq) => (eq.id === updated.id ? updated : eq)));
+    refreshEquipment();
     setShowRentalManager(false);
     setSelectedEquipment(null);
   };
@@ -178,7 +178,7 @@ export default function EquipmentPage() {
     {
       key: 'title',
       label: 'Titel',
-      render: (item: WPEquipment) => item.title?.rendered || item.title || 'Kein Titel',
+      render: (item: WPEquipment) => typeof item.title === 'string' ? item.title : item.title?.rendered || 'Kein Titel',
     },
     {
       key: 'brand',
@@ -468,7 +468,7 @@ export default function EquipmentPage() {
                 className="p-4 bg-[var(--color-surface-light)] border border-[var(--color-border)] rounded-lg hover:opacity-80 transition-opacity text-left"
               >
                 <div className="font-medium text-[var(--color-text-primary)]">
-                  {item.title?.rendered || item.title || `Equipment ${item.id}`}
+                  {typeof item.title === 'string' ? item.title : item.title?.rendered || `Equipment ${item.id}`}
                 </div>
                 <div className="text-sm text-[var(--color-text-secondary)] mt-1">
                   {item.meta?._equipment_brand} {item.meta?._equipment_model}
