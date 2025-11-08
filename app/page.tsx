@@ -5,7 +5,7 @@ import TestimonialSlider from "./components/TestimonialSlider";
 import ContactFooter from "./components/ContactFooter";
 import NewsletterForm from "./components/NewsletterForm";
 import LogoCarousel from "./components/LogoCarousel";
-import testimonialsData from "../data/testimonials.json";
+import { getHomepageConfig, getHomepageLogos, getTestimonials } from "./lib/homepage-config";
 
 export const metadata: Metadata = {
   description: 'Neck Tontechnik - Dein Partner für professionelle Tontechnik in Leipzig. Mixing, Mastering, Live-Sound und Equipment-Verleih mit jahrelanger Erfahrung.',
@@ -16,39 +16,12 @@ export const metadata: Metadata = {
   }
 };
 
-export default function Home() {
-  // Example images for the Hero component
-  const heroImages = [
-    {
-      src: "/images/home/home-hero-1.jpg",
-      alt: "Professional audio engineering setup",
-      title: "Klang auf den Punkt – Live und im Studio",
-      description: "Professionelle Tontechnik-Lösungen für Veranstaltungen und Studios"
-    },
-    {
-      src: "/images/home/home-hero-2.jpg",
-      alt: "2 Sound Engineers photgraphed from the side looking at a mixing desk",
-      title: "Tontechnik",
-      description: "Professionelle Tontechnik-Lösungen für Veranstaltungen und Studios"
-    },
-    {
-      src: "/images/home/home-hero-3.jpg",
-      alt: "2 Sound Engineers photgraphed from above looking at a mixing desk",
-      title: "Live-Tontechnik",
-      description: "Professionelle Beschallung für Ihre Veranstaltung"
-    },
-  ];
-
-  // Logo carousel data
-  const referenceLogos = [
-    { src: "/images/home/references-carousel/102boyz-1.png", alt: "102 Boyz" },
-    { src: "/images/home/references-carousel/Korn_Logo_grey.png", alt: "Korn" },
-    { src: "/images/home/references-carousel/SKIAGGU_SHADOW.png", alt: "Skiaggu" },
-    { src: "/images/home/references-carousel/red-bull-symphonic-gold (1).png", alt: "Red Bull Symphonic" }
-  ];
-
-  // Real testimonials from clients
-  const testimonials = testimonialsData;
+export default async function Home() {
+  // Load homepage configuration
+  const homepageConfig = await getHomepageConfig();
+  const heroImages = homepageConfig.images;
+  const referenceLogos = await getHomepageLogos();
+  const testimonials = getTestimonials();
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
@@ -155,7 +128,7 @@ export default function Home() {
         ></div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 w-full">
           <div className="max-w-4xl mx-auto text-center text-[var(--color-text-primary)] text-xl leading-relaxed mb-16">
-            Egal ob fette Liveshows, präzise Studioarbeit oder praxisnahe Workshops – ich bringe Sound auf die nächste Stufe. Mit jahrelanger Erfahrung als Live- und Studiotechniker sorge ich dafür, dass deine Musik genau so klingt, wie sie klingen soll.
+            {homepageConfig.quoteText}
           </div>
           <div className="w-full">
             <LogoCarousel logos={referenceLogos} autoplayDelay={2000} />

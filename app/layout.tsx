@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "./components/Header";
-import StandardFooter from "./components/StandardFooter";
+import ConditionalLayout from "./components/ConditionalLayout";
 
 
 export const metadata: Metadata = {
@@ -115,9 +114,9 @@ export default function RootLayout({
             })
           }}
         />
-        <Header />
-        {children}
-        <StandardFooter />
+        <ConditionalLayout>
+          {children}
+        </ConditionalLayout>
       </body>
     </html>
   );

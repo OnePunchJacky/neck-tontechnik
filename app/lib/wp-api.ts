@@ -1,0 +1,170 @@
+// WordPress REST API client utilities
+
+import axios, { AxiosInstance } from 'axios';
+
+const WORDPRESS_API_URL = process.env.WORDPRESS_API_URL || 'https://staging.neck-tontechnik.com/wp-json/wp/v2';
+
+export class WordPressAPI {
+  private client: AxiosInstance;
+  private authToken?: string;
+
+  constructor(authToken?: string) {
+    this.authToken = authToken;
+    this.client = axios.create({
+      baseURL: WORDPRESS_API_URL,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && {
+          'Authorization': `Basic ${authToken}`,
+        }),
+      },
+    });
+  }
+
+  setAuthToken(token: string) {
+    this.authToken = token;
+    this.client.defaults.headers['Authorization'] = `Basic ${token}`;
+  }
+
+  // Authentication
+  async verifyCredentials(username: string, password: string): Promise<{ user: any; token: string } | null> {
+    try {
+      const token = Buffer.from(`${username}:${password}`).toString('base64');
+      const response = await axios.get(`${WORDPRESS_API_URL}/users/me`, {
+        headers: {
+          'Authorization': `Basic ${token}`,
+        },
+      });
+
+      if (response.data && response.data.id) {
+        return {
+          user: response.data,
+          token,
+        };
+      }
+      return null;
+    } catch (error: any) {
+      // Log detailed error for debugging
+      if (error.response) {
+        console.error('WordPress auth error response:', {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data,
+        });
+      } else if (error.request) {
+        console.error('WordPress auth error - no response:', error.request);
+      } else {
+        console.error('WordPress auth error:', error.message);
+      }
+      return null;
+    }
+  }
+
+  // Generic post operations
+  async getPosts(postType: string, params?: Record<string, any>) {
+    const response = await this.client.get(`/${postType}`, { params });
+    return response.data;
+  }
+
+  async getPost(postType: string, id: number) {
+    const response = await this.client.get(`/${postType}/${id}`);
+    return response.data;
+  }
+
+  async createPost(postType: string, data: Record<string, any>) {
+    const response = await this.client.post(`/${postType}`, data);
+    return response.data;
+  }
+
+  async updatePost(postType: string, id: number, data: Record<string, any>) {
+    const response = await this.client.post(`/${postType}/${id}`, data);
+    return response.data;
+  }
+
+  async deletePost(postType: string, id: number, force = true) {
+    const response = await this.client.delete(`/${postType}/${id}`, {
+      params: { force },
+    });
+    return response.data;
+  }
+
+  // Media operations
+  async uploadMedia(file: File | Blob, filename: string, onProgress?: (progress: number) => void) {
+    const formData = new FormData();
+    formData.append('file', file, filename);
+
+    const response = await this.client.post('/media', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(progress);
+        }
+      },
+    });
+    return response.data;
+  }
+
+  async getMedia(id?: number) {
+    if (id) {
+      const response = await this.client.get(`/media/${id}`);
+      return response.data;
+    }
+    const response = await this.client.get('/media', { params: { per_page: 100 } });
+    return response.data;
+  }
+
+  async deleteMedia(id: number, force = true) {
+    const response = await this.client.delete(`/media/${id}`, { params: { force } });
+    return response.data;
+  }
+
+  // ACF field operations (via meta)
+  async updateACFFields(postType: string, id: number, acfFields: Record<string, any>) {
+    // ACF fields are typically stored in meta or via ACF REST API
+    // This depends on how ACF is configured
+    const response = await this.client.post(`/${postType}/${id}`, {
+      meta: acfFields,
+    });
+    return response.data;
+  }
+
+  // Update ACF fields via ACF REST API
+  async updateACFViaREST(postId: number, fields: Record<string, any>) {
+    // ACF REST API endpoint is at /wp-json/acf/v3/posts/{id}
+    // But since we're using baseURL, we need to use the full path or adjust
+    const baseUrl = WORDPRESS_API_URL.replace('/wp/v2', '');
+    const response = await axios.post(
+      `${baseUrl}/acf/v3/posts/${postId}`,
+      { fields },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.authToken && {
+            'Authorization': `Basic ${this.authToken}`,
+          }),
+        },
+      }
+    );
+    return response.data;
+  }
+
+  // Equipment-specific operations
+  async updateEquipmentMeta(id: number, meta: Record<string, any>) {
+    const response = await this.client.post(`/gear/${id}`, {
+      meta,
+    });
+    return response.data;
+  }
+
+  // Categories/Taxonomies
+  async getCategories(taxonomy: string) {
+    const response = await this.client.get(`/${taxonomy}`, { params: { per_page: 100 } });
+    return response.data;
+  }
+}
+
+export const wpApi = new WordPressAPI();
+
