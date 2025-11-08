@@ -3,7 +3,7 @@
 interface FormFieldProps {
   label: string;
   name: string;
-  type?: 'text' | 'textarea' | 'number' | 'email' | 'date' | 'url' | 'select' | 'multiselect';
+  type?: 'text' | 'textarea' | 'number' | 'email' | 'date' | 'url' | 'select' | 'multiselect' | 'password';
   value: any;
   onChange: (value: any) => void;
   required?: boolean;
@@ -11,6 +11,7 @@ interface FormFieldProps {
   options?: { value: string | number; label: string }[];
   rows?: number;
   error?: string;
+  helperText?: string;
 }
 
 export default function FormField({
@@ -24,6 +25,7 @@ export default function FormField({
   options,
   rows = 4,
   error,
+  helperText,
 }: FormFieldProps) {
   return (
     <div className="mb-4">
@@ -112,6 +114,9 @@ export default function FormField({
 
       {error && (
         <p className="mt-1 text-sm text-red-500">{error}</p>
+      )}
+      {helperText && !error && (
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">{helperText}</p>
       )}
     </div>
   );
