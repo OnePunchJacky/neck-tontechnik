@@ -60,7 +60,7 @@ export default function AdminNav() {
           lg:translate-x-0
         `}
       >
-        <div className="p-6 border-b border-[var(--color-border)]">
+        <div className="p-6 border-b border-[var(--color-border)] pt-20 lg:pt-6">
           <h2 className="text-xl font-bold text-[var(--color-text-primary)]">
             Admin Panel
           </h2>

@@ -5,10 +5,10 @@ import DataTable from '@/app/components/admin/DataTable';
 import FormField from '@/app/components/admin/FormField';
 import MediaUploader from '@/app/components/admin/MediaUploader';
 import { WPAudioSample } from '@/app/lib/types';
+import { useAdminDataCache } from '@/app/contexts/AdminDataCache';
 
 export default function AudioSamplesPage() {
-  const [samples, setSamples] = useState<WPAudioSample[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { audioSamples: samples, loading, refreshAudioSamples } = useAdminDataCache();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [beforeAudio, setBeforeAudio] = useState<any>(null);
@@ -20,22 +20,10 @@ export default function AudioSamplesPage() {
   });
 
   useEffect(() => {
-    fetchSamples();
-  }, []);
-
-  const fetchSamples = async () => {
-    try {
-      const response = await fetch('/api/wp/audio-samples?per_page=100');
-      if (response.ok) {
-        const data = await response.json();
-        setSamples(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('Error fetching audio samples:', error);
-    } finally {
-      setLoading(false);
+    if (samples.length === 0 && !loading.audioSamples) {
+      refreshAudioSamples();
     }
-  };
+  }, [samples.length, loading.audioSamples, refreshAudioSamples]);
 
   const handleEdit = async (sample: WPAudioSample) => {
     setFormData({
@@ -80,7 +68,7 @@ export default function AudioSamplesPage() {
       });
 
       if (response.ok) {
-        fetchSamples();
+        refreshAudioSamples();
       }
     } catch (error) {
       console.error('Error deleting sample:', error);
@@ -121,7 +109,7 @@ export default function AudioSamplesPage() {
         setFormData({ title: '', content: '', status: 'publish' });
         setBeforeAudio(null);
         setAfterAudio(null);
-        fetchSamples();
+        refreshAudioSamples();
       } else {
         const error = await response.json();
         alert(error.error || 'Fehler beim Speichern');
@@ -165,7 +153,7 @@ export default function AudioSamplesPage() {
     },
   ];
 
-  if (loading) {
+  if (loading.audioSamples && samples.length === 0) {
     return <div className="text-[var(--color-text-secondary)]">Laden...</div>;
   }
 

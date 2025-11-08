@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminNav from './AdminNav';
+import { AdminDataCacheProvider } from '@/app/contexts/AdminDataCache';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -39,12 +40,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-dark)]">
-      <AdminNav />
-      <main className="lg:ml-64 p-6 pt-20 lg:pt-6">
-        {children}
-      </main>
-    </div>
+    <AdminDataCacheProvider>
+      <div className="min-h-screen bg-[var(--color-bg-dark)]">
+        <AdminNav />
+        <main className="lg:ml-64 p-6 pt-20 lg:pt-6">
+          {children}
+        </main>
+      </div>
+    </AdminDataCacheProvider>
   );
 }
 

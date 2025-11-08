@@ -35,8 +35,82 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const post = await wpApi.updatePost('live_reference', parseInt(id), body);
-    return NextResponse.json(post);
+    // Separate ACF fields from regular post data
+    const { acf, ...postData } = body;
+    
+    // Update the post with all data including ACF fields
+    const updatePayload = { ...postData };
+    if (acf && Object.keys(acf).length > 0) {
+      updatePayload.acf = acf;
+      console.log('Updating live reference with ACF fields:', acf);
+    }
+    
+    let updatedPost = await wpApi.updatePost('live_reference', parseInt(id), updatePayload);
+    
+    // If ACF fields weren't updated via the main update, try alternative methods
+    if (acf && Object.keys(acf).length > 0) {
+      try {
+        const verifyPost = await wpApi.getPost('live_reference', parseInt(id));
+        const needsACFUpdate = !verifyPost.acf || 
+          Object.keys(acf).some(key => {
+            const sentValue = acf[key];
+            const savedValue = verifyPost.acf?.[key];
+            
+            // Handle null/undefined comparisons
+            if (sentValue === null || sentValue === undefined) {
+              return savedValue !== null && savedValue !== undefined && savedValue !== '';
+            }
+            if (savedValue === null || savedValue === undefined) {
+              return sentValue !== null && sentValue !== undefined && sentValue !== '';
+            }
+            
+            // Handle number/string conversions (for media IDs)
+            if (typeof sentValue === 'number' && typeof savedValue === 'string') {
+              return String(sentValue) !== savedValue && String(sentValue) !== String(parseInt(savedValue));
+            }
+            if (typeof sentValue === 'string' && typeof savedValue === 'number') {
+              return sentValue !== String(savedValue) && parseInt(sentValue) !== savedValue;
+            }
+            
+            // Handle arrays (like gallery)
+            if (Array.isArray(sentValue) && Array.isArray(savedValue)) {
+              if (sentValue.length !== savedValue.length) return true;
+              return sentValue.some((val, idx) => {
+                const saved = savedValue[idx];
+                if (typeof val === 'number' && typeof saved === 'string') {
+                  return String(val) !== saved;
+                }
+                return val !== saved;
+              });
+            }
+            
+            return sentValue !== savedValue;
+          });
+        
+        if (needsACFUpdate) {
+          console.log('ACF fields not updated via main update, trying ACF REST API...');
+          try {
+            await wpApi.updateACFViaREST(parseInt(id), acf);
+            console.log('ACF REST API update successful');
+            updatedPost = await wpApi.getPost('live_reference', parseInt(id));
+          } catch (acfError: any) {
+            console.log('ACF REST API also failed, trying meta fallback. Error:', acfError?.response?.data || acfError?.message);
+            const metaPayload: Record<string, any> = {};
+            Object.keys(acf).forEach(key => {
+              metaPayload[`acf_${key}`] = acf[key];
+            });
+            updatedPost = await wpApi.updatePost('live_reference', parseInt(id), { meta: metaPayload });
+            console.log('Meta fallback update completed');
+          }
+        } else {
+          console.log('ACF fields successfully updated via main update');
+        }
+      } catch (verifyError) {
+        console.error('Error verifying ACF update:', verifyError);
+      }
+    }
+
+    return NextResponse.json(updatedPost);
   } catch (error: any) {
     if (error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

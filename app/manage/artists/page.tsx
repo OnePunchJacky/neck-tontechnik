@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import DataTable from '@/app/components/admin/DataTable';
 import FormField from '@/app/components/admin/FormField';
 import { WPArtist } from '@/app/lib/types';
+import { useAdminDataCache } from '@/app/contexts/AdminDataCache';
 
 export default function ArtistsPage() {
-  const [artists, setArtists] = useState<WPArtist[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { artists, loading, refreshArtists } = useAdminDataCache();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
@@ -18,22 +18,10 @@ export default function ArtistsPage() {
   });
 
   useEffect(() => {
-    fetchArtists();
-  }, []);
-
-  const fetchArtists = async () => {
-    try {
-      const response = await fetch('/api/wp/artists?per_page=100');
-      if (response.ok) {
-        const data = await response.json();
-        setArtists(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('Error fetching artists:', error);
-    } finally {
-      setLoading(false);
+    if (artists.length === 0 && !loading.artists) {
+      refreshArtists();
     }
-  };
+  }, [artists.length, loading.artists, refreshArtists]);
 
   const handleEdit = (artist: WPArtist) => {
     setFormData({
@@ -57,7 +45,7 @@ export default function ArtistsPage() {
       });
 
       if (response.ok) {
-        fetchArtists();
+        refreshArtists();
       }
     } catch (error) {
       console.error('Error deleting artist:', error);
@@ -91,7 +79,7 @@ export default function ArtistsPage() {
         setShowForm(false);
         setEditingId(null);
         setFormData({ title: '', content: '', status: 'publish', featured_media: '' });
-        fetchArtists();
+        refreshArtists();
       } else {
         const error = await response.json();
         alert(error.error || 'Fehler beim Speichern');
@@ -127,7 +115,7 @@ export default function ArtistsPage() {
     },
   ];
 
-  if (loading) {
+  if (loading.artists && artists.length === 0) {
     return <div className="text-[var(--color-text-secondary)]">Laden...</div>;
   }
 

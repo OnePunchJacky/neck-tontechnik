@@ -35,14 +35,26 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    // Handle meta fields separately for equipment
-    if (body.meta) {
-      await wpApi.updateEquipmentMeta(parseInt(id), body.meta);
-      delete body.meta;
+    // Separate meta fields from regular post data
+    const { meta, ...postData } = body;
+    
+    // Update the post first
+    let updatedPost = await wpApi.updatePost('gear', parseInt(id), postData);
+    
+    // Handle meta fields separately for equipment (these are custom meta, not ACF)
+    if (meta && Object.keys(meta).length > 0) {
+      console.log('Updating equipment meta fields:', meta);
+      try {
+        updatedPost = await wpApi.updateEquipmentMeta(parseInt(id), meta);
+        console.log('Equipment meta fields updated successfully');
+      } catch (metaError: any) {
+        console.error('Error updating equipment meta:', metaError?.response?.data || metaError?.message);
+        // Try fallback: update via post meta
+        updatedPost = await wpApi.updatePost('gear', parseInt(id), { meta });
+      }
     }
 
-    const post = await wpApi.updatePost('gear', parseInt(id), body);
-    return NextResponse.json(post);
+    return NextResponse.json(updatedPost);
   } catch (error: any) {
     if (error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

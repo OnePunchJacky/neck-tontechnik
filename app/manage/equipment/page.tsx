@@ -5,10 +5,10 @@ import DataTable from '@/app/components/admin/DataTable';
 import FormField from '@/app/components/admin/FormField';
 import EquipmentRentalManager from '@/app/components/admin/EquipmentRentalManager';
 import { WPEquipment } from '@/app/lib/types';
+import { useAdminDataCache } from '@/app/contexts/AdminDataCache';
 
 export default function EquipmentPage() {
-  const [equipment, setEquipment] = useState<WPEquipment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { equipment, loading, refreshEquipment } = useAdminDataCache();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showRentalManager, setShowRentalManager] = useState(false);
@@ -38,22 +38,10 @@ export default function EquipmentPage() {
   });
 
   useEffect(() => {
-    fetchEquipment();
-  }, []);
-
-  const fetchEquipment = async () => {
-    try {
-      const response = await fetch('/api/wp/equipment?per_page=100');
-      if (response.ok) {
-        const data = await response.json();
-        setEquipment(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('Error fetching equipment:', error);
-    } finally {
-      setLoading(false);
+    if (equipment.length === 0 && !loading.equipment) {
+      refreshEquipment();
     }
-  };
+  }, [equipment.length, loading.equipment, refreshEquipment]);
 
   const handleEdit = (item: WPEquipment) => {
     setFormData({
@@ -95,7 +83,7 @@ export default function EquipmentPage() {
       });
 
       if (response.ok) {
-        fetchEquipment();
+        refreshEquipment();
       }
     } catch (error) {
       console.error('Error deleting equipment:', error);
@@ -163,7 +151,7 @@ export default function EquipmentPage() {
           _last_maintenance: '',
           _next_maintenance: '',
         });
-        fetchEquipment();
+        refreshEquipment();
       } else {
         const error = await response.json();
         alert(error.error || 'Fehler beim Speichern');
@@ -222,7 +210,7 @@ export default function EquipmentPage() {
     },
   ];
 
-  if (loading) {
+  if (loading.equipment && equipment.length === 0) {
     return <div className="text-[var(--color-text-secondary)]">Laden...</div>;
   }
 

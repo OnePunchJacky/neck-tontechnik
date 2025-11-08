@@ -68,7 +68,7 @@ export default function EquipmentRentalManager({
   return (
     <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-6">
       <h3 className="text-xl font-semibold text-[var(--color-text-primary)] mb-6">
-        Mietverwaltung: {equipment.title?.rendered || equipment.title || `Equipment ${equipment.id}`}
+        Mietverwaltung: {typeof equipment.title === 'string' ? equipment.title : equipment.title?.rendered || `Equipment ${equipment.id}`}
       </h3>
 
       <div className="space-y-6">

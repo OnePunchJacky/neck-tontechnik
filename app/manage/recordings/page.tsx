@@ -5,10 +5,10 @@ import DataTable from '@/app/components/admin/DataTable';
 import FormField from '@/app/components/admin/FormField';
 import MediaSelector from '@/app/components/admin/MediaSelector';
 import { WPRecording } from '@/app/lib/types';
+import { useAdminDataCache } from '@/app/contexts/AdminDataCache';
 
 export default function RecordingsPage() {
-  const [recordings, setRecordings] = useState<WPRecording[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { recordings, loading, refreshRecordings } = useAdminDataCache();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showMediaSelector, setShowMediaSelector] = useState(false);
@@ -28,23 +28,12 @@ export default function RecordingsPage() {
     artist: '',
   });
 
+  // Data is already loaded from cache, but refresh if needed
   useEffect(() => {
-    fetchRecordings();
-  }, []);
-
-  const fetchRecordings = async () => {
-    try {
-      const response = await fetch('/api/wp/recordings?per_page=100');
-      if (response.ok) {
-        const data = await response.json();
-        setRecordings(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('Error fetching recordings:', error);
-    } finally {
-      setLoading(false);
+    if (recordings.length === 0 && !loading.recordings) {
+      refreshRecordings();
     }
-  };
+  }, [recordings.length, loading.recordings, refreshRecordings]);
 
   const handleEdit = (recording: WPRecording) => {
     setFormData({
@@ -76,7 +65,7 @@ export default function RecordingsPage() {
       });
 
       if (response.ok) {
-        fetchRecordings();
+        refreshRecordings();
       }
     } catch (error) {
       console.error('Error deleting recording:', error);
@@ -129,7 +118,7 @@ export default function RecordingsPage() {
           youtube: '',
           artist: '',
         });
-        fetchRecordings();
+        refreshRecordings();
       } else {
         const error = await response.json();
         alert(error.error || 'Fehler beim Speichern');
@@ -178,7 +167,7 @@ export default function RecordingsPage() {
     },
   ];
 
-  if (loading) {
+  if (loading.recordings && recordings.length === 0) {
     return <div className="text-[var(--color-text-secondary)]">Laden...</div>;
   }
 

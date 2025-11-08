@@ -3,29 +3,17 @@
 import { useState, useEffect } from 'react';
 import MediaUploader from '@/app/components/admin/MediaUploader';
 import { WPMedia } from '@/app/lib/types';
+import { useAdminDataCache } from '@/app/contexts/AdminDataCache';
 
 export default function MediaPage() {
-  const [media, setMedia] = useState<WPMedia[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { media, loading, refreshMedia } = useAdminDataCache();
   const [filter, setFilter] = useState<'all' | 'image' | 'audio'>('all');
 
   useEffect(() => {
-    fetchMedia();
-  }, []);
-
-  const fetchMedia = async () => {
-    try {
-      const response = await fetch('/api/wp/media');
-      if (response.ok) {
-        const data = await response.json();
-        setMedia(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('Error fetching media:', error);
-    } finally {
-      setLoading(false);
+    if (media.length === 0 && !loading.media) {
+      refreshMedia();
     }
-  };
+  }, [media.length, loading.media, refreshMedia]);
 
   const handleDelete = async (mediaItem: WPMedia) => {
     if (!confirm(`Möchtest du dieses Medium wirklich löschen?`)) {
@@ -38,7 +26,7 @@ export default function MediaPage() {
       });
 
       if (response.ok) {
-        fetchMedia();
+        refreshMedia();
       }
     } catch (error) {
       console.error('Error deleting media:', error);
@@ -56,7 +44,7 @@ export default function MediaPage() {
     ? media.filter((m) => m.mime_type?.startsWith('image/'))
     : media.filter((m) => m.mime_type?.startsWith('audio/'));
 
-  if (loading) {
+  if (loading.media && media.length === 0) {
     return <div className="text-[var(--color-text-secondary)]">Laden...</div>;
   }
 
