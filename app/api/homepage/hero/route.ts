@@ -60,7 +60,16 @@ export async function PUT(request: NextRequest) {
     const updatedConfig = { ...existingConfig, ...body };
     
     // Write to file
-    await writeFile(HOMEPAGE_CONFIG_FILE, JSON.stringify(updatedConfig, null, 2), 'utf-8');
+    try {
+      await writeFile(HOMEPAGE_CONFIG_FILE, JSON.stringify(updatedConfig, null, 2), 'utf-8');
+    } catch (writeError: any) {
+      // On Vercel, file system is read-only
+      console.error('Cannot write to file system (read-only in production):', writeError);
+      return NextResponse.json(
+        { error: 'File system is read-only in production. Please use a database or external storage.' },
+        { status: 500 }
+      );
+    }
     
     return NextResponse.json(updatedConfig);
   } catch (error: any) {
@@ -69,7 +78,7 @@ export async function PUT(request: NextRequest) {
     }
     console.error('Error updating homepage config:', error);
     return NextResponse.json(
-      { error: 'Failed to update homepage config' },
+      { error: error.message || 'Failed to update homepage config' },
       { status: 500 }
     );
   }

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/app/lib/auth';
-import { readFile, writeFile } from 'fs/promises';
-import { join } from 'path';
+import { readFile, writeFile, mkdir } from 'fs/promises';
+import { join, dirname } from 'path';
+import { existsSync } from 'fs';
 
 const TESTIMONIALS_FILE = join(process.cwd(), 'data', 'testimonials.json');
 
@@ -24,20 +25,44 @@ export async function POST(request: NextRequest) {
     await requireAuth();
     const body = await request.json();
     
-    // Read existing testimonials
-    const fileContent = await readFile(TESTIMONIALS_FILE, 'utf-8');
-    const testimonials = JSON.parse(fileContent);
+    // Ensure data directory exists
+    const dataDir = dirname(TESTIMONIALS_FILE);
+    if (!existsSync(dataDir)) {
+      await mkdir(dataDir, { recursive: true });
+    }
+    
+    // Read existing testimonials or initialize empty array
+    let testimonials: any[] = [];
+    try {
+      const fileContent = await readFile(TESTIMONIALS_FILE, 'utf-8');
+      testimonials = JSON.parse(fileContent);
+    } catch (error: any) {
+      // File doesn't exist yet, start with empty array
+      if (error.code !== 'ENOENT') {
+        throw error;
+      }
+    }
     
     // Add new testimonial
     const newTestimonial = {
-      id: Math.max(...testimonials.map((t: any) => t.id || 0), 0) + 1,
+      id: testimonials.length > 0 ? Math.max(...testimonials.map((t: any) => t.id || 0), 0) + 1 : 1,
       ...body,
     };
     
     testimonials.push(newTestimonial);
     
     // Write back to file
-    await writeFile(TESTIMONIALS_FILE, JSON.stringify(testimonials, null, 2), 'utf-8');
+    try {
+      await writeFile(TESTIMONIALS_FILE, JSON.stringify(testimonials, null, 2), 'utf-8');
+    } catch (writeError: any) {
+      // On Vercel, file system is read-only, so we can't write files
+      // This is expected in production - you'll need to use a database or external storage
+      console.error('Cannot write to file system (read-only in production):', writeError);
+      return NextResponse.json(
+        { error: 'File system is read-only in production. Please use a database or external storage.' },
+        { status: 500 }
+      );
+    }
     
     return NextResponse.json(newTestimonial);
   } catch (error: any) {
@@ -46,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
     console.error('Error creating testimonial:', error);
     return NextResponse.json(
-      { error: 'Failed to create testimonial' },
+      { error: error.message || 'Failed to create testimonial' },
       { status: 500 }
     );
   }
@@ -66,8 +91,19 @@ export async function PUT(request: NextRequest) {
     }
     
     // Read existing testimonials
-    const fileContent = await readFile(TESTIMONIALS_FILE, 'utf-8');
-    const testimonials = JSON.parse(fileContent);
+    let testimonials: any[] = [];
+    try {
+      const fileContent = await readFile(TESTIMONIALS_FILE, 'utf-8');
+      testimonials = JSON.parse(fileContent);
+    } catch (error: any) {
+      if (error.code === 'ENOENT') {
+        return NextResponse.json(
+          { error: 'Testimonials file not found' },
+          { status: 404 }
+        );
+      }
+      throw error;
+    }
     
     // Find and update testimonial
     const index = testimonials.findIndex((t: any) => t.id === id);
@@ -81,7 +117,16 @@ export async function PUT(request: NextRequest) {
     testimonials[index] = { ...testimonials[index], ...updateData };
     
     // Write back to file
-    await writeFile(TESTIMONIALS_FILE, JSON.stringify(testimonials, null, 2), 'utf-8');
+    try {
+      await writeFile(TESTIMONIALS_FILE, JSON.stringify(testimonials, null, 2), 'utf-8');
+    } catch (writeError: any) {
+      // On Vercel, file system is read-only
+      console.error('Cannot write to file system (read-only in production):', writeError);
+      return NextResponse.json(
+        { error: 'File system is read-only in production. Please use a database or external storage.' },
+        { status: 500 }
+      );
+    }
     
     return NextResponse.json(testimonials[index]);
   } catch (error: any) {
@@ -90,7 +135,7 @@ export async function PUT(request: NextRequest) {
     }
     console.error('Error updating testimonial:', error);
     return NextResponse.json(
-      { error: 'Failed to update testimonial' },
+      { error: error.message || 'Failed to update testimonial' },
       { status: 500 }
     );
   }
@@ -110,14 +155,34 @@ export async function DELETE(request: NextRequest) {
     }
     
     // Read existing testimonials
-    const fileContent = await readFile(TESTIMONIALS_FILE, 'utf-8');
-    const testimonials = JSON.parse(fileContent);
+    let testimonials: any[] = [];
+    try {
+      const fileContent = await readFile(TESTIMONIALS_FILE, 'utf-8');
+      testimonials = JSON.parse(fileContent);
+    } catch (error: any) {
+      if (error.code === 'ENOENT') {
+        return NextResponse.json(
+          { error: 'Testimonials file not found' },
+          { status: 404 }
+        );
+      }
+      throw error;
+    }
     
     // Filter out the testimonial
     const filtered = testimonials.filter((t: any) => t.id !== id);
     
     // Write back to file
-    await writeFile(TESTIMONIALS_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
+    try {
+      await writeFile(TESTIMONIALS_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
+    } catch (writeError: any) {
+      // On Vercel, file system is read-only
+      console.error('Cannot write to file system (read-only in production):', writeError);
+      return NextResponse.json(
+        { error: 'File system is read-only in production. Please use a database or external storage.' },
+        { status: 500 }
+      );
+    }
     
     return NextResponse.json({ success: true });
   } catch (error: any) {
@@ -126,7 +191,7 @@ export async function DELETE(request: NextRequest) {
     }
     console.error('Error deleting testimonial:', error);
     return NextResponse.json(
-      { error: 'Failed to delete testimonial' },
+      { error: error.message || 'Failed to delete testimonial' },
       { status: 500 }
     );
   }

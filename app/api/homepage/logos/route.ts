@@ -46,7 +46,16 @@ export async function PUT(request: NextRequest) {
     }
     
     // Write to file
-    await writeFile(LOGOS_FILE, JSON.stringify(body, null, 2), 'utf-8');
+    try {
+      await writeFile(LOGOS_FILE, JSON.stringify(body, null, 2), 'utf-8');
+    } catch (writeError: any) {
+      // On Vercel, file system is read-only
+      console.error('Cannot write to file system (read-only in production):', writeError);
+      return NextResponse.json(
+        { error: 'File system is read-only in production. Please use a database or external storage.' },
+        { status: 500 }
+      );
+    }
     
     return NextResponse.json(body);
   } catch (error: any) {
@@ -55,7 +64,7 @@ export async function PUT(request: NextRequest) {
     }
     console.error('Error updating logos:', error);
     return NextResponse.json(
-      { error: 'Failed to update logos' },
+      { error: error.message || 'Failed to update logos' },
       { status: 500 }
     );
   }
