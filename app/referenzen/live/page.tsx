@@ -12,17 +12,9 @@ interface WPLiveReference {
   slug: string;
   categories: number[];
   acf?: {
-    venue_name?: string;
-    event_date?: string;
     location?: string;
-    capacity?: number;
-    event_type?: string;
-    equipment_used?: string;
-    featured_image?: number | string;
-    gallery?: number[];
-    client_testimonial?: string;
-    client_name?: string;
-    client_position?: string;
+    bild?: number | string;
+    year?: string;
   };
   _embedded?: {
     'wp:term'?: Array<Array<{
@@ -80,9 +72,9 @@ async function getLiveReferences(): Promise<(WPLiveReference & { featuredImage?:
         if (reference._embedded?.['wp:featuredmedia']?.[0]) {
           featuredImage = reference._embedded['wp:featuredmedia'][0];
         }
-        // Check for custom featured image in ACF
-        else if (reference.acf?.featured_image) {
-          const imageId = reference.acf.featured_image;
+        // Check for custom image in ACF field 'bild'
+        else if (reference.acf?.bild) {
+          const imageId = reference.acf.bild;
           if (typeof imageId === 'number' || (typeof imageId === 'string' && !isNaN(Number(imageId)))) {
             try {
               const mediaResponse = await fetch(
@@ -96,7 +88,7 @@ async function getLiveReferences(): Promise<(WPLiveReference & { featuredImage?:
                 featuredImage = await mediaResponse.json();
               }
             } catch (error) {
-              console.error(`Error fetching featured image for reference ${reference.id}:`, error);
+              console.error(`Error fetching bild image for reference ${reference.id}:`, error);
             }
           }
         }
@@ -105,11 +97,17 @@ async function getLiveReferences(): Promise<(WPLiveReference & { featuredImage?:
       })
     );
     
-    // Sort by event date if available, otherwise by post date (newest first)
+    // Sort by year if available, otherwise by post date (newest first)
     return referencesWithImages.sort((a, b) => {
-      const dateA = a.acf?.event_date ? new Date(a.acf.event_date) : new Date(a.date);
-      const dateB = b.acf?.event_date ? new Date(b.acf.event_date) : new Date(b.date);
-      return dateB.getTime() - dateA.getTime();
+      const yearA = a.acf?.year ? parseInt(a.acf.year) : null;
+      const yearB = b.acf?.year ? parseInt(b.acf.year) : null;
+      if (yearA && yearB) {
+        return yearB - yearA; // Newest year first
+      }
+      if (yearA) return -1;
+      if (yearB) return 1;
+      // Fallback to post date
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
   } catch (error) {
     console.error('Error fetching live references:', error);
@@ -257,7 +255,6 @@ export default function LiveReferencesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredReferences.map((reference) => {
                 const categories = reference._embedded?.['wp:term']?.[0] || [];
-                const eventDate = reference.acf?.event_date ? new Date(reference.acf.event_date) : null;
                 
                 return (
                   <article
@@ -307,12 +304,9 @@ export default function LiveReferencesPage() {
                         {reference.title.rendered}
                       </h3>
                       
-                      {/* Venue & Location */}
-                      {(reference.acf?.venue_name || reference.acf?.location) && (
+                      {/* Location & Year */}
+                      {(reference.acf?.location || reference.acf?.year) && (
                         <div className="text-[var(--color-text-muted)] text-sm mb-3">
-                          {reference.acf?.venue_name && (
-                            <div className="font-medium">{reference.acf.venue_name}</div>
-                          )}
                           {reference.acf?.location && (
                             <div className="flex items-center gap-1">
                               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,61 +316,22 @@ export default function LiveReferencesPage() {
                               {reference.acf.location}
                             </div>
                           )}
+                          {reference.acf?.year && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              {reference.acf.year}
+                            </div>
+                          )}
                         </div>
                       )}
-                      
-                      {/* Event Details */}
-                      <div className="flex flex-wrap gap-4 text-xs text-[var(--color-text-muted)] mb-4">
-                        {eventDate && (
-                          <div className="flex items-center gap-1">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            {eventDate.toLocaleDateString('de-DE')}
-                          </div>
-                        )}
-                        {reference.acf?.capacity && (
-                          <div className="flex items-center gap-1">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            {reference.acf.capacity} Plätze
-                          </div>
-                        )}
-                        {reference.acf?.event_type && (
-                          <div className="bg-[var(--color-surface-light)] px-2 py-1 rounded">
-                            {reference.acf.event_type}
-                          </div>
-                        )}
-                      </div>
                       
                       {/* Description */}
                       {reference.content.rendered && (
                         <p className="text-[var(--color-text-secondary)] text-sm mb-4 line-clamp-3">
                           {stripHtml(reference.content.rendered)}
                         </p>
-                      )}
-                      
-                      {/* Equipment Used */}
-                      {reference.acf?.equipment_used && (
-                        <div className="text-xs text-[var(--color-text-muted)] border-t border-[var(--color-border)] pt-3">
-                          <strong>Equipment:</strong> {reference.acf.equipment_used}
-                        </div>
-                      )}
-                      
-                      {/* Client Testimonial */}
-                      {reference.acf?.client_testimonial && (
-                        <div className="mt-4 p-3 bg-[var(--color-surface-light)] rounded-lg">
-                          <p className="text-[var(--color-text-secondary)] text-sm italic mb-2">
-                            "{reference.acf.client_testimonial}"
-                          </p>
-                          {reference.acf?.client_name && (
-                            <div className="text-xs text-[var(--color-text-muted)]">
-                              — {reference.acf.client_name}
-                              {reference.acf?.client_position && `, ${reference.acf.client_position}`}
-                            </div>
-                          )}
-                        </div>
                       )}
                     </div>
                   </article>

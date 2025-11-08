@@ -75,17 +75,9 @@ export interface WPLiveReference {
   categories: number[];
   tags: number[];
   acf?: {
-    venue_name?: string;
-    event_date?: string;
     location?: string;
-    capacity?: number;
-    event_type?: string;
-    equipment_used?: string;
-    featured_image?: number | string;
-    gallery?: number[];
-    client_testimonial?: string;
-    client_name?: string;
-    client_position?: string;
+    bild?: number | string;
+    year?: string;
   };
   _links: Record<string, any>;
 }

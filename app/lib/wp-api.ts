@@ -12,6 +12,7 @@ export class WordPressAPI {
     this.authToken = authToken;
     this.client = axios.create({
       baseURL: WORDPRESS_API_URL,
+      timeout: 60000, // 60 seconds timeout
       headers: {
         'Content-Type': 'application/json',
         ...(authToken && {
@@ -76,9 +77,32 @@ export class WordPressAPI {
     return response.data;
   }
 
-  async updatePost(postType: string, id: number, data: Record<string, any>) {
-    const response = await this.client.post(`/${postType}/${id}`, data);
-    return response.data;
+  async updatePost(postType: string, id: number, data: Record<string, any>, retries = 2) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const response = await this.client.post(`/${postType}/${id}`, data, {
+          timeout: 60000, // 60 seconds per attempt
+        });
+        return response.data;
+      } catch (error: any) {
+        // Retry on connection errors or timeouts
+        const isRetryable = error.code === 'ECONNRESET' || 
+                           error.code === 'ETIMEDOUT' || 
+                           error.code === 'ECONNREFUSED' ||
+                           (error.response?.status >= 500 && error.response?.status < 600);
+        
+        if (isRetryable && attempt < retries) {
+          console.log(`Retrying updatePost (attempt ${attempt + 1}/${retries})...`);
+          // Wait before retrying (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+          continue;
+        }
+        
+        // If not retryable or out of retries, throw the error
+        throw error;
+      }
+    }
+    throw new Error('Failed to update post after retries');
   }
 
   async deletePost(postType: string, id: number, force = true) {

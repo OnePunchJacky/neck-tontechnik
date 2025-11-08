@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
       params[key] = value;
     });
 
+    // WordPress REST API includes meta fields by default if custom-fields support is enabled
+    // The post type has 'custom-fields' in supports, so meta should be included
     const posts = await wpApi.getPosts('live_reference', params);
     return NextResponse.json(posts);
   } catch (error: any) {

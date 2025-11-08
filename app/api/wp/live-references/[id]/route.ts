@@ -39,6 +39,7 @@ export async function PUT(
     const { acf, ...postData } = body;
     
     // Update the post with all data including ACF fields
+    // ACF fields should be sent directly in the 'acf' object
     const updatePayload = { ...postData };
     if (acf && Object.keys(acf).length > 0) {
       updatePayload.acf = acf;
@@ -47,7 +48,7 @@ export async function PUT(
     
     let updatedPost = await wpApi.updatePost('live_reference', parseInt(id), updatePayload);
     
-    // If ACF fields weren't updated via the main update, try alternative methods
+    // If ACF fields weren't updated via the main update, try ACF REST API
     if (acf && Object.keys(acf).length > 0) {
       try {
         const verifyPost = await wpApi.getPost('live_reference', parseInt(id));
@@ -64,24 +65,12 @@ export async function PUT(
               return sentValue !== null && sentValue !== undefined && sentValue !== '';
             }
             
-            // Handle number/string conversions (for media IDs)
+            // Handle number/string conversions (for media IDs like bild)
             if (typeof sentValue === 'number' && typeof savedValue === 'string') {
               return String(sentValue) !== savedValue && String(sentValue) !== String(parseInt(savedValue));
             }
             if (typeof sentValue === 'string' && typeof savedValue === 'number') {
               return sentValue !== String(savedValue) && parseInt(sentValue) !== savedValue;
-            }
-            
-            // Handle arrays (like gallery)
-            if (Array.isArray(sentValue) && Array.isArray(savedValue)) {
-              if (sentValue.length !== savedValue.length) return true;
-              return sentValue.some((val, idx) => {
-                const saved = savedValue[idx];
-                if (typeof val === 'number' && typeof saved === 'string') {
-                  return String(val) !== saved;
-                }
-                return val !== saved;
-              });
             }
             
             return sentValue !== savedValue;
@@ -95,6 +84,7 @@ export async function PUT(
             updatedPost = await wpApi.getPost('live_reference', parseInt(id));
           } catch (acfError: any) {
             console.log('ACF REST API also failed, trying meta fallback. Error:', acfError?.response?.data || acfError?.message);
+            // Last resort: try meta with acf_ prefix (same as recordings)
             const metaPayload: Record<string, any> = {};
             Object.keys(acf).forEach(key => {
               metaPayload[`acf_${key}`] = acf[key];
@@ -115,9 +105,24 @@ export async function PUT(
     if (error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    console.error('Error updating live reference:', error);
+    
+    // Log detailed error information
+    console.error('Error updating live reference:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      stack: error.stack,
+    });
+    
+    // Return more detailed error message
+    const errorMessage = error.response?.data?.message || 
+                        error.response?.data?.error?.message ||
+                        error.message || 
+                        'Failed to update live reference';
+    
     return NextResponse.json(
-      { error: 'Failed to update live reference' },
+      { error: errorMessage, details: error.response?.data },
       { status: 500 }
     );
   }

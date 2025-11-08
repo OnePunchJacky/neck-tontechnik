@@ -19,17 +19,9 @@ export default function LiveReferencesPage() {
     status: 'publish',
   });
   const [acfFields, setAcfFields] = useState({
-    venue_name: '',
-    event_date: '',
     location: '',
-    capacity: '',
-    event_type: '',
-    equipment_used: '',
-    featured_image: '',
-    gallery: '',
-    client_testimonial: '',
-    client_name: '',
-    client_position: '',
+    bild: '',
+    year: '',
   });
 
   useEffect(() => {
@@ -44,18 +36,12 @@ export default function LiveReferencesPage() {
       content: reference.content.rendered || '',
       status: reference.status,
     });
+    
+    // Read ACF fields (location, bild, year)
     setAcfFields({
-      venue_name: reference.acf?.venue_name || '',
-      event_date: reference.acf?.event_date || '',
-      location: reference.acf?.location || '',
-      capacity: String(reference.acf?.capacity || ''),
-      event_type: reference.acf?.event_type || '',
-      equipment_used: reference.acf?.equipment_used || '',
-      featured_image: String(reference.acf?.featured_image || ''),
-      gallery: Array.isArray(reference.acf?.gallery) ? reference.acf.gallery.join(',') : '',
-      client_testimonial: reference.acf?.client_testimonial || '',
-      client_name: reference.acf?.client_name || '',
-      client_position: reference.acf?.client_position || '',
+      location: String(reference.acf?.location || ''),
+      bild: String(reference.acf?.bild || ''),
+      year: String(reference.acf?.year || ''),
     });
     setEditingId(reference.id);
     setShowForm(true);
@@ -90,19 +76,11 @@ export default function LiveReferencesPage() {
         status: formData.status,
       };
 
-      // ACF fields should be sent in an 'acf' object
+      // ACF fields: location, bild, year
       payload.acf = {
-        venue_name: acfFields.venue_name || '',
-        event_date: acfFields.event_date || '',
         location: acfFields.location || '',
-        capacity: acfFields.capacity ? parseInt(acfFields.capacity) : null,
-        event_type: acfFields.event_type || '',
-        equipment_used: acfFields.equipment_used || '',
-        featured_image: acfFields.featured_image && acfFields.featured_image.trim() ? (acfFields.featured_image.startsWith('http') ? acfFields.featured_image : (isNaN(parseInt(acfFields.featured_image)) ? null : parseInt(acfFields.featured_image))) : null,
-        gallery: acfFields.gallery ? acfFields.gallery.split(',').map((id) => parseInt(id.trim())).filter(Boolean) : [],
-        client_testimonial: acfFields.client_testimonial || '',
-        client_name: acfFields.client_name || '',
-        client_position: acfFields.client_position || '',
+        bild: acfFields.bild && acfFields.bild.trim() ? (acfFields.bild.startsWith('http') ? acfFields.bild : (isNaN(parseInt(acfFields.bild)) ? null : parseInt(acfFields.bild))) : null,
+        year: acfFields.year || '',
       };
 
       const url = editingId
@@ -121,22 +99,15 @@ export default function LiveReferencesPage() {
         setEditingId(null);
         setFormData({ title: '', content: '', status: 'publish' });
         setAcfFields({
-          venue_name: '',
-          event_date: '',
           location: '',
-          capacity: '',
-          event_type: '',
-          equipment_used: '',
-          featured_image: '',
-          gallery: '',
-          client_testimonial: '',
-          client_name: '',
-          client_position: '',
+          bild: '',
+          year: '',
         });
         refreshLiveReferences();
       } else {
         const error = await response.json();
-        alert(error.error || 'Fehler beim Speichern');
+        console.error('Error response:', error);
+        alert(error.error || error.message || 'Fehler beim Speichern');
       }
     } catch (error) {
       console.error('Error saving reference:', error);
@@ -150,12 +121,8 @@ export default function LiveReferencesPage() {
   };
 
   const handleMediaSelected = (media: any) => {
-    if (mediaSelectorField === 'featured_image') {
-      setAcfFields({ ...acfFields, featured_image: String(media.id) });
-    } else if (mediaSelectorField === 'gallery') {
-      const currentGallery = acfFields.gallery ? acfFields.gallery.split(',').filter(Boolean) : [];
-      const newGallery = [...currentGallery, String(media.id)];
-      setAcfFields({ ...acfFields, gallery: newGallery.join(',') });
+    if (mediaSelectorField === 'bild') {
+      setAcfFields({ ...acfFields, bild: String(media.id) });
     }
     setShowMediaSelector(false);
     setMediaSelectorField('');
@@ -260,24 +227,6 @@ export default function LiveReferencesPage() {
           />
 
           <div className="mt-6 space-y-4">
-            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">
-              Event Details
-            </h3>
-
-            <FormField
-              label="Venue Name"
-              name="venue_name"
-              value={acfFields.venue_name}
-              onChange={(value) => setAcfFields({ ...acfFields, venue_name: value })}
-            />
-
-            <FormField
-              label="Event Date"
-              name="event_date"
-              type="date"
-              value={acfFields.event_date}
-              onChange={(value) => setAcfFields({ ...acfFields, event_date: value })}
-            />
 
             <FormField
               label="Location"
@@ -287,107 +236,33 @@ export default function LiveReferencesPage() {
             />
 
             <FormField
-              label="Capacity"
-              name="capacity"
-              type="number"
-              value={acfFields.capacity}
-              onChange={(value) => setAcfFields({ ...acfFields, capacity: value })}
+              label="Year"
+              name="year"
+              value={acfFields.year}
+              onChange={(value) => setAcfFields({ ...acfFields, year: value })}
             />
-
-            <FormField
-              label="Event Type"
-              name="event_type"
-              value={acfFields.event_type}
-              onChange={(value) => setAcfFields({ ...acfFields, event_type: value })}
-            />
-
-            <FormField
-              label="Equipment Used"
-              name="equipment_used"
-              type="textarea"
-              value={acfFields.equipment_used}
-              onChange={(value) => setAcfFields({ ...acfFields, equipment_used: value })}
-              rows={3}
-            />
-          </div>
-
-          <div className="mt-6 space-y-4">
-            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">
-              Bilder
-            </h3>
 
             <div>
               <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                Hauptbild
+                Bild
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={acfFields.featured_image}
-                  onChange={(e) => setAcfFields({ ...acfFields, featured_image: e.target.value })}
+                  value={acfFields.bild}
+                  onChange={(e) => setAcfFields({ ...acfFields, bild: e.target.value })}
                   placeholder="Media ID oder URL"
                   className="flex-1 px-4 py-2 bg-[var(--color-surface-light)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)]"
                 />
                 <button
                   type="button"
-                  onClick={() => handleMediaSelect('featured_image')}
+                  onClick={() => handleMediaSelect('bild')}
                   className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90"
                 >
                   Auswählen
                 </button>
               </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                Galerie (IDs durch Komma getrennt)
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={acfFields.gallery}
-                  onChange={(e) => setAcfFields({ ...acfFields, gallery: e.target.value })}
-                  placeholder="z.B. 1, 2, 3"
-                  className="flex-1 px-4 py-2 bg-[var(--color-surface-light)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)]"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleMediaSelect('gallery')}
-                  className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90"
-                >
-                  Hinzufügen
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 space-y-4">
-            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">
-              Kundenbewertung
-            </h3>
-
-            <FormField
-              label="Testimonial"
-              name="client_testimonial"
-              type="textarea"
-              value={acfFields.client_testimonial}
-              onChange={(value) => setAcfFields({ ...acfFields, client_testimonial: value })}
-              rows={4}
-            />
-
-            <FormField
-              label="Kundenname"
-              name="client_name"
-              value={acfFields.client_name}
-              onChange={(value) => setAcfFields({ ...acfFields, client_name: value })}
-            />
-
-            <FormField
-              label="Position"
-              name="client_position"
-              value={acfFields.client_position}
-              onChange={(value) => setAcfFields({ ...acfFields, client_position: value })}
-            />
           </div>
 
           <div className="mt-6 flex gap-4">
