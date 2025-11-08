@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/app/lib/auth';
-import { readFile, writeFile } from 'fs/promises';
+import { WordPressAPI } from '@/app/lib/wp-api';
+import { readFile } from 'fs/promises';
 import { join } from 'path';
 
 const LOGOS_FILE = join(process.cwd(), 'data', 'homepage-logos.json');
@@ -25,6 +26,19 @@ async function getLogos() {
 
 export async function GET() {
   try {
+    // Try WordPress first (production)
+    try {
+      const wpApi = new WordPressAPI();
+      const logos = await wpApi.getOptionViaMeta('homepage_logos');
+      if (logos && Array.isArray(logos) && logos.length > 0) {
+        return NextResponse.json(logos);
+      }
+    } catch (wpError: any) {
+      // Fallback to file system for local development
+      console.log('WordPress not available, using file system fallback');
+    }
+    
+    // Fallback to file system
     const logos = await getLogos();
     return NextResponse.json(logos);
   } catch (error) {
@@ -35,7 +49,8 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const wpApi = new WordPressAPI(session.token);
     const body = await request.json();
     
     if (!Array.isArray(body)) {
@@ -45,17 +60,8 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    // Write to file
-    try {
-      await writeFile(LOGOS_FILE, JSON.stringify(body, null, 2), 'utf-8');
-    } catch (writeError: any) {
-      // On Vercel, file system is read-only
-      console.error('Cannot write to file system (read-only in production):', writeError);
-      return NextResponse.json(
-        { error: 'File system is read-only in production. Please use a database or external storage.' },
-        { status: 500 }
-      );
-    }
+    // Store in WordPress
+    await wpApi.setOptionViaMeta('homepage_logos', body);
     
     return NextResponse.json(body);
   } catch (error: any) {

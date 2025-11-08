@@ -164,6 +164,114 @@ export class WordPressAPI {
     const response = await this.client.get(`/${taxonomy}`, { params: { per_page: 100 } });
     return response.data;
   }
+
+  // WordPress Options (via custom endpoint or meta)
+  // Note: WordPress REST API doesn't have built-in options endpoint
+  // We'll use a special post or custom endpoint
+  async getOption(optionName: string) {
+    // Try to get from a special settings post first
+    // If that doesn't work, we'll need a custom WordPress endpoint
+    try {
+      const baseUrl = WORDPRESS_API_URL.replace('/wp/v2', '');
+      const response = await axios.get(`${baseUrl}/options/${optionName}`, {
+        headers: {
+          ...(this.authToken && {
+            'Authorization': `Basic ${this.authToken}`,
+          }),
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      // If custom endpoint doesn't exist, try getting from a settings post
+      // For now, we'll use meta on a special post
+      console.log('Options endpoint not available, using fallback');
+      return null;
+    }
+  }
+
+  async updateOption(optionName: string, value: any) {
+    // Try custom endpoint first
+    try {
+      const baseUrl = WORDPRESS_API_URL.replace('/wp/v2', '');
+      const response = await axios.post(
+        `${baseUrl}/options/${optionName}`,
+        { value },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(this.authToken && {
+              'Authorization': `Basic ${this.authToken}`,
+            }),
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      // Fallback: store as meta on a special settings post
+      // We'll create/update a post with slug 'homepage-settings'
+      console.log('Options endpoint not available, using settings post fallback');
+      throw error;
+    }
+  }
+
+  // Get or create a settings post for storing options
+  async getSettingsPost() {
+    try {
+      // Try to find existing settings post by slug
+      const posts = await this.getPosts('post', { slug: 'homepage-settings', per_page: 1 });
+      if (posts && Array.isArray(posts) && posts.length > 0) {
+        return posts[0];
+      }
+      
+      // If not found, try to find by title
+      const allPosts = await this.getPosts('post', { search: 'Homepage Settings', per_page: 10 });
+      const settingsPost = allPosts.find((p: any) => p.title?.rendered === 'Homepage Settings' || p.slug === 'homepage-settings');
+      if (settingsPost) {
+        return settingsPost;
+      }
+      
+      // Create settings post if it doesn't exist
+      const newPost = await this.createPost('post', {
+        title: 'Homepage Settings',
+        slug: 'homepage-settings',
+        status: 'private',
+        content: 'Internal settings post for homepage configuration',
+      });
+      return newPost;
+    } catch (error: any) {
+      console.error('Error getting settings post:', error);
+      // If we can't create/get the post, throw a more descriptive error
+      throw new Error(`Failed to get or create settings post: ${error.message}`);
+    }
+  }
+
+  // Store option as meta on settings post
+  async setOptionViaMeta(optionName: string, value: any) {
+    const settingsPost = await this.getSettingsPost();
+    const currentPost = await this.getPost('post', settingsPost.id);
+    const existingMeta = currentPost.meta || {};
+    
+    // Merge with existing meta to preserve other options
+    await this.updatePost('post', settingsPost.id, {
+      meta: {
+        ...existingMeta,
+        [optionName]: value,
+      },
+    });
+    return value;
+  }
+
+  // Get option from meta on settings post
+  async getOptionViaMeta(optionName: string) {
+    try {
+      const settingsPost = await this.getSettingsPost();
+      const post = await this.getPost('post', settingsPost.id);
+      return post.meta?.[optionName] || null;
+    } catch (error) {
+      console.error('Error getting option from meta:', error);
+      return null;
+    }
+  }
 }
 
 export const wpApi = new WordPressAPI();
