@@ -35,7 +35,7 @@ export default function MediaPage() {
   };
 
   const handleUploadComplete = (uploadedMedia: WPMedia) => {
-    fetchMedia();
+    refreshMedia();
   };
 
   const filteredMedia = filter === 'all'
