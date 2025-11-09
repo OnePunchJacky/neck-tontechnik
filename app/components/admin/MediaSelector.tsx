@@ -70,13 +70,15 @@ export default function MediaSelector({
             `}
           >
             {item.mime_type?.startsWith('image/') ? (
-              <img
-                src={item.source_url}
-                alt={item.title?.rendered || 'Media'}
-                className="w-full h-24 object-cover"
-              />
+              <div className="w-full aspect-square bg-[var(--color-surface-light)] flex items-center justify-center overflow-hidden">
+                <img
+                  src={item.source_url}
+                  alt={item.title?.rendered || 'Media'}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             ) : (
-              <div className="w-full h-24 bg-[var(--color-surface-light)] flex items-center justify-center">
+              <div className="w-full aspect-square bg-[var(--color-surface-light)] flex items-center justify-center">
                 <span className="text-2xl">🎵</span>
               </div>
             )}

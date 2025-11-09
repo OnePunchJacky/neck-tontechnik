@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import DataTable from '@/app/components/admin/DataTable';
 import FormField from '@/app/components/admin/FormField';
 import MediaSelector from '@/app/components/admin/MediaSelector';
+import ImagePreview from '@/app/components/admin/ImagePreview';
 import { WPLiveReference } from '@/app/lib/types';
 import { useAdminDataCache } from '@/app/contexts/AdminDataCache';
 
@@ -332,27 +333,12 @@ export default function LiveReferencesPage() {
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                Bild
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={acfFields.bild}
-                  onChange={(e) => setAcfFields({ ...acfFields, bild: e.target.value })}
-                  placeholder="Media ID oder URL"
-                  className="flex-1 px-4 py-2 bg-[var(--color-surface-light)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)]"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleMediaSelect('bild')}
-                  className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90"
-                >
-                  Auswählen
-                </button>
-              </div>
-            </div>
+            <ImagePreview
+              mediaId={acfFields.bild}
+              onSelect={() => handleMediaSelect('bild')}
+              onRemove={() => setAcfFields({ ...acfFields, bild: '' })}
+              label="Bild"
+            />
           </div>
 
           <div className="mt-6 flex gap-4">

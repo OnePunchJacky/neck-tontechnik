@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import DataTable from '@/app/components/admin/DataTable';
 import FormField from '@/app/components/admin/FormField';
 import MediaSelector from '@/app/components/admin/MediaSelector';
-import { WPRecording } from '@/app/lib/types';
+import ImagePreview from '@/app/components/admin/ImagePreview';
+import SearchableMultiSelect from '@/app/components/admin/SearchableMultiSelect';
+import { WPRecording, WPArtist } from '@/app/lib/types';
 import { useAdminDataCache } from '@/app/contexts/AdminDataCache';
 
 export default function RecordingsPage() {
-  const { recordings, loading, refreshRecordings } = useAdminDataCache();
+  const { recordings, loading, refreshRecordings, artists, loading: cacheLoading, refreshArtists } = useAdminDataCache();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showMediaSelector, setShowMediaSelector] = useState(false);
@@ -17,7 +19,10 @@ export default function RecordingsPage() {
     title: '',
     content: '',
     status: 'publish',
+    categories: [] as number[],
   });
+  const [availableCategories, setAvailableCategories] = useState<Array<{ id: number; name: string }>>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
   const [acfFields, setAcfFields] = useState({
     cover: '',
     spotify: '',
@@ -25,7 +30,7 @@ export default function RecordingsPage() {
     soundcloud: '',
     bandcamp: '',
     youtube: '',
-    artist: '',
+    artist: [] as number[],
   });
 
   // Data is already loaded from cache, but refresh if needed
@@ -35,12 +40,59 @@ export default function RecordingsPage() {
     }
   }, [recordings.length, loading.recordings, refreshRecordings]);
 
+  // Ensure artists are loaded
+  useEffect(() => {
+    if (artists.length === 0 && !cacheLoading.artists) {
+      refreshArtists();
+    }
+  }, [artists.length, cacheLoading.artists, refreshArtists]);
+
+  // Fetch categories when form is shown
+  useEffect(() => {
+    const fetchCategories = async () => {
+      if (showForm && availableCategories.length === 0 && !loadingCategories) {
+        setLoadingCategories(true);
+        try {
+          const response = await fetch('/api/wp/categories');
+          if (response.ok) {
+            const data = await response.json();
+            // Transform WordPress category format to {id, name} for SearchableMultiSelect
+            const transformed = data.map((cat: any) => ({
+              id: cat.id,
+              name: cat.name || cat.slug || `Category ${cat.id}`,
+            }));
+            setAvailableCategories(transformed);
+          }
+        } catch (error) {
+          console.error('Error fetching categories:', error);
+        } finally {
+          setLoadingCategories(false);
+        }
+      }
+    };
+    fetchCategories();
+  }, [showForm, availableCategories.length, loadingCategories]);
+
   const handleEdit = (recording: WPRecording) => {
+    // Convert categories array to number array
+    const categoryIds = Array.isArray(recording.categories)
+      ? recording.categories.map((id: any) => typeof id === 'number' ? id : parseInt(String(id))).filter((id: number) => !isNaN(id))
+      : [];
+    
     setFormData({
       title: recording.title.rendered || '',
       content: recording.content.rendered || '',
       status: recording.status,
+      categories: categoryIds,
     });
+    
+    // Convert artist array to number array
+    const artistIds = Array.isArray(recording.acf?.artist) 
+      ? recording.acf.artist.map((id: any) => typeof id === 'number' ? id : parseInt(String(id))).filter((id: number) => !isNaN(id))
+      : recording.acf?.artist 
+        ? [typeof recording.acf.artist === 'number' ? recording.acf.artist : parseInt(String(recording.acf.artist))].filter((id: number) => !isNaN(id))
+        : [];
+    
     setAcfFields({
       cover: String(recording.acf?.cover || ''),
       spotify: recording.acf?.spotify || '',
@@ -48,7 +100,7 @@ export default function RecordingsPage() {
       soundcloud: recording.acf?.soundcloud || '',
       bandcamp: recording.acf?.bandcamp || '',
       youtube: recording.acf?.youtube || '',
-      artist: Array.isArray(recording.acf?.artist) ? recording.acf.artist.join(',') : '',
+      artist: artistIds,
     });
     setEditingId(recording.id);
     setShowForm(true);
@@ -81,6 +133,7 @@ export default function RecordingsPage() {
         title: formData.title,
         content: formData.content,
         status: formData.status,
+        categories: Array.isArray(formData.categories) ? formData.categories.filter((id) => !isNaN(id) && id > 0) : [],
       };
 
       // ACF fields should be sent in an 'acf' object, not 'meta'
@@ -91,7 +144,7 @@ export default function RecordingsPage() {
         soundcloud: acfFields.soundcloud || '',
         bandcamp: acfFields.bandcamp || '',
         youtube: acfFields.youtube || '',
-        artist: acfFields.artist ? acfFields.artist.split(',').map((id) => parseInt(id.trim())).filter(Boolean) : [],
+        artist: Array.isArray(acfFields.artist) ? acfFields.artist.filter((id) => !isNaN(id) && id > 0) : [],
       };
 
       const url = editingId
@@ -108,7 +161,7 @@ export default function RecordingsPage() {
       if (response.ok) {
         setShowForm(false);
         setEditingId(null);
-        setFormData({ title: '', content: '', status: 'publish' });
+        setFormData({ title: '', content: '', status: 'publish', categories: [] });
         setAcfFields({
           cover: '',
           spotify: '',
@@ -116,7 +169,7 @@ export default function RecordingsPage() {
           soundcloud: '',
           bandcamp: '',
           youtube: '',
-          artist: '',
+          artist: [],
         });
         refreshRecordings();
       } else {
@@ -210,105 +263,97 @@ export default function RecordingsPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-6">
-          <FormField
-            label="Titel"
-            name="title"
-            value={formData.title}
-            onChange={(value) => setFormData({ ...formData, title: value })}
-            required
-          />
-
-          <FormField
-            label="Inhalt"
-            name="content"
-            type="textarea"
-            value={formData.content}
-            onChange={(value) => setFormData({ ...formData, content: value })}
-            rows={6}
-          />
-
-          <FormField
-            label="Status"
-            name="status"
-            type="select"
-            value={formData.status}
-            onChange={(value) => setFormData({ ...formData, status: value })}
-            options={[
-              { value: 'publish', label: 'Veröffentlicht' },
-              { value: 'draft', label: 'Entwurf' },
-              { value: 'private', label: 'Privat' },
-            ]}
-          />
-
-          <div className="mt-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                Cover Bild
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={acfFields.cover}
-                  onChange={(e) => setAcfFields({ ...acfFields, cover: e.target.value })}
-                  placeholder="Media ID oder URL"
-                  className="flex-1 px-4 py-2 bg-[var(--color-surface-light)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)]"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleMediaSelect('cover')}
-                  className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90"
-                >
-                  Auswählen
-                </button>
-              </div>
+          <div className="flex gap-6 items-start">
+            <div className="flex-[0_0_65%] space-y-4">
+              <FormField
+                label="Titel"
+                name="title"
+                value={formData.title}
+                onChange={(value) => setFormData({ ...formData, title: value })}
+                required
+              />
+              <FormField
+                label="Inhalt"
+                name="content"
+                type="textarea"
+                value={formData.content}
+                onChange={(value) => setFormData({ ...formData, content: value })}
+                rows={6}
+              />
+              <SearchableMultiSelect
+                label="Kategorien"
+                options={availableCategories}
+                selectedIds={formData.categories}
+                onChange={(selectedIds) => setFormData({ ...formData, categories: selectedIds.map((id) => typeof id === 'number' ? id : parseInt(String(id))).filter((id) => !isNaN(id)) })}
+                placeholder="Kategorien auswählen..."
+                searchPlaceholder="Kategorien durchsuchen..."
+              />
+              <SearchableMultiSelect
+                label="Artists"
+                options={artists.map((artist: WPArtist) => ({
+                  id: artist.id,
+                  name: artist.title.rendered || `Artist ${artist.id}`,
+                }))}
+                selectedIds={acfFields.artist}
+                onChange={(selectedIds) => setAcfFields({ ...acfFields, artist: selectedIds.map((id) => typeof id === 'number' ? id : parseInt(String(id))).filter((id) => !isNaN(id)) })}
+                placeholder="Artists auswählen..."
+                searchPlaceholder="Artists durchsuchen..."
+              />
+              <FormField
+                label="Spotify URL"
+                name="spotify"
+                type="url"
+                value={acfFields.spotify}
+                onChange={(value) => setAcfFields({ ...acfFields, spotify: value })}
+              />
+              <FormField
+                label="Spotify Album ID"
+                name="spotify_album_id"
+                value={acfFields.spotify_album_id}
+                onChange={(value) => setAcfFields({ ...acfFields, spotify_album_id: value })}
+              />
+              <FormField
+                label="SoundCloud URL"
+                name="soundcloud"
+                type="url"
+                value={acfFields.soundcloud}
+                onChange={(value) => setAcfFields({ ...acfFields, soundcloud: value })}
+              />
+              <FormField
+                label="Bandcamp URL"
+                name="bandcamp"
+                type="url"
+                value={acfFields.bandcamp}
+                onChange={(value) => setAcfFields({ ...acfFields, bandcamp: value })}
+              />
+              <FormField
+                label="YouTube URL"
+                name="youtube"
+                type="url"
+                value={acfFields.youtube}
+                onChange={(value) => setAcfFields({ ...acfFields, youtube: value })}
+              />
             </div>
-
-            <FormField
-              label="Spotify URL"
-              name="spotify"
-              type="url"
-              value={acfFields.spotify}
-              onChange={(value) => setAcfFields({ ...acfFields, spotify: value })}
-            />
-
-            <FormField
-              label="Spotify Album ID"
-              name="spotify_album_id"
-              value={acfFields.spotify_album_id}
-              onChange={(value) => setAcfFields({ ...acfFields, spotify_album_id: value })}
-            />
-
-            <FormField
-              label="SoundCloud URL"
-              name="soundcloud"
-              type="url"
-              value={acfFields.soundcloud}
-              onChange={(value) => setAcfFields({ ...acfFields, soundcloud: value })}
-            />
-
-            <FormField
-              label="Bandcamp URL"
-              name="bandcamp"
-              type="url"
-              value={acfFields.bandcamp}
-              onChange={(value) => setAcfFields({ ...acfFields, bandcamp: value })}
-            />
-
-            <FormField
-              label="YouTube URL"
-              name="youtube"
-              type="url"
-              value={acfFields.youtube}
-              onChange={(value) => setAcfFields({ ...acfFields, youtube: value })}
-            />
-
-            <FormField
-              label="Artist IDs (durch Komma getrennt)"
-              name="artist"
-              value={acfFields.artist}
-              onChange={(value) => setAcfFields({ ...acfFields, artist: value })}
-              placeholder="z.B. 1, 2, 3"
-            />
+            <div className="flex-[0_0_35%] space-y-4">
+              <FormField
+                label="Status"
+                name="status"
+                type="select"
+                value={formData.status}
+                onChange={(value) => setFormData({ ...formData, status: value })}
+                options={[
+                  { value: 'publish', label: 'Veröffentlicht' },
+                  { value: 'draft', label: 'Entwurf' },
+                  { value: 'private', label: 'Privat' },
+                ]}
+              />
+              <ImagePreview
+                mediaId={acfFields.cover}
+                onSelect={() => handleMediaSelect('cover')}
+                onRemove={() => setAcfFields({ ...acfFields, cover: '' })}
+                label="Cover Bild"
+              />
+            </div>
           </div>
 
           <div className="mt-6 flex gap-4">
