@@ -15,6 +15,7 @@ import {
   Menu,
   LogOut,
   UserCog,
+  FileText,
 } from 'lucide-react';
 
 const navItems = [
@@ -25,6 +26,7 @@ const navItems = [
   { href: '/manage/audio-samples', label: 'Audio Samples', icon: Headphones },
   { href: '/manage/equipment', label: 'Equipment', icon: Settings },
   { href: '/manage/artists', label: 'Artists', icon: Users },
+  { href: '/manage/pages', label: 'Seiten', icon: FileText },
   { href: '/manage/media', label: 'Media Library', icon: ImageIcon },
   { href: '/manage/settings', label: 'Einstellungen', icon: UserCog },
 ];

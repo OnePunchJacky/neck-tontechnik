@@ -216,6 +216,30 @@ export interface WPArtist {
   _links: Record<string, any>;
 }
 
+export interface WPPage {
+  id: number;
+  date: string;
+  date_gmt: string;
+  guid: { rendered: string };
+  modified: string;
+  modified_gmt: string;
+  slug: string;
+  status: 'publish' | 'draft' | 'private' | 'pending';
+  type: string;
+  link: string;
+  title: { rendered: string };
+  content: { rendered: string };
+  excerpt: { rendered: string };
+  author: number;
+  featured_media: number;
+  comment_status: string;
+  ping_status: string;
+  menu_order: number;
+  template: string;
+  meta: Record<string, any>;
+  _links: Record<string, any>;
+}
+
 export interface WPSession {
   user: {
     id: number;

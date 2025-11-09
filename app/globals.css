@@ -249,3 +249,46 @@ p {
 .animate-stagger-6 { animation-delay: 0.6s; }
 .animate-stagger-7 { animation-delay: 0.7s; }
 
+/* WYSIWYG Editor Styles */
+.rswe-container {
+  background-color: var(--color-surface-light) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+.rswe-toolbar {
+  background-color: var(--color-surface) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  padding: 8px !important;
+}
+
+.rswe-toolbar button {
+  color: var(--color-text-primary) !important;
+  background-color: transparent !important;
+  border: 1px solid var(--color-border) !important;
+  padding: 4px 8px !important;
+  margin: 0 2px !important;
+  border-radius: 4px !important;
+}
+
+.rswe-toolbar button:hover {
+  background-color: var(--color-surface-light) !important;
+}
+
+.rswe-toolbar button.active {
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+.rswe-editor {
+  background-color: var(--color-surface-light) !important;
+  color: var(--color-text-primary) !important;
+  padding: 12px !important;
+  min-height: 400px !important;
+}
+
+.rswe-editor:focus {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: -2px !important;
+}
+
