@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo } from 'react';
 import ContactFooter from '../components/ContactFooter';
 
 // Type definitions for WordPress equipment
@@ -47,23 +46,17 @@ interface WPEquipment {
   };
 }
 
-interface CartItem {
+interface SelectedItem {
   equipmentId: number;
-  title: string;
+  equipment: WPEquipment;
   quantity: number;
-  dailyRate: number;
-  weekendRate: number;
-  weeklyRate: number;
-  monthlyRate: number;
-  deposit: number;
-  availableUnits: number;
 }
 
-interface RentalCart {
-  items: CartItem[];
-  startDate: string;
-  endDate: string;
-  totalPrice: number;
+interface CustomerData {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
 }
 
 async function getEquipment(): Promise<WPEquipment[]> {
@@ -71,7 +64,7 @@ async function getEquipment(): Promise<WPEquipment[]> {
     const response = await fetch(
       `https://staging.neck-tontechnik.com/wp-json/wp/v2/gear?per_page=100&_embed&status=publish`,
       { 
-        next: { revalidate: 60 }, // Cache for 1 minute for testing
+        next: { revalidate: 60 },
         headers: {
           'Accept': 'application/json',
         }
@@ -84,7 +77,6 @@ async function getEquipment(): Promise<WPEquipment[]> {
     }
     
     const equipment: WPEquipment[] = await response.json();
-    console.log('Raw equipment data:', equipment); // Debug log
     
     // Sort by brand and model
     return equipment.sort((a, b) => {
@@ -127,29 +119,6 @@ async function getEquipmentCategories() {
   }
 }
 
-async function checkAvailabilityForPeriod(equipmentId: number, startDate: string, endDate: string): Promise<number> {
-  try {
-    const response = await fetch(`https://staging.neck-tontechnik.com/wp-json/wp/v2/gear/${equipmentId}`, {
-      cache: 'no-store' // Always fetch fresh availability data
-    });
-    
-    if (!response.ok) {
-      return 0;
-    }
-    
-    const equipment = await response.json();
-    const totalUnits = equipment.meta?._equipment_menge || 0;
-    
-    // For now, return total units. In production, you'd check against booking data
-    // This would require a custom REST endpoint to check availability
-    return totalUnits;
-  } catch (error) {
-    console.error('Error checking availability:', error);
-    return 0;
-  }
-}
-
-
 function getCategoryColor(categoryName: string): string {
   const colorMap: { [key: string]: string } = {
     'Mikrofone': 'bg-blue-100 text-blue-800',
@@ -164,7 +133,6 @@ function getCategoryColor(categoryName: string): string {
 }
 
 export default function EquipmentRentalPage() {
-  const router = useRouter();
   const [equipment, setEquipment] = useState<WPEquipment[]>([]);
   const [filteredEquipment, setFilteredEquipment] = useState<WPEquipment[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -172,20 +140,25 @@ export default function EquipmentRentalPage() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [loading, setLoading] = useState(true);
   
-  // Cart state
-  const [cart, setCart] = useState<RentalCart>({
-    items: [],
-    startDate: '',
-    endDate: '',
-    totalPrice: 0
-  });
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  
   // Date selection
   const [selectedStartDate, setSelectedStartDate] = useState('');
   const [selectedEndDate, setSelectedEndDate] = useState('');
   const [dateError, setDateError] = useState('');
   
+  // Selected items (quantities per equipment)
+  const [selectedItems, setSelectedItems] = useState<Map<number, SelectedItem>>(new Map());
+  
+  // Customer data
+  const [customerData, setCustomerData] = useState<CustomerData>({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
   useEffect(() => {
     async function fetchData() {
       const [equipmentData, categoriesData] = await Promise.all([
@@ -251,140 +224,163 @@ export default function EquipmentRentalPage() {
     return true;
   };
 
-  const calculatePrice = (equipment: WPEquipment, quantity: number, startDate: string, endDate: string): number => {
+  const calculatePrice = (equipment: WPEquipment, quantity: number, startDate: string, endDate: string): { rentalPrice: number; deposit: number } => {
+    if (!startDate || !endDate || quantity <= 0) {
+      return { rentalPrice: 0, deposit: 0 };
+    }
+
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     
     const dailyRate = equipment.meta?._tagesmiete || 0;
     const weekendRate = equipment.meta?._wochenendmiete || 0;
     const weeklyRate = equipment.meta?._wochenmiete || 0;
     const monthlyRate = equipment.meta?._monatsmiete || 0;
+    const deposit = (equipment.meta?._kaution || 0) * quantity;
     
-    let price = 0;
+    let rentalPrice = 0;
     
     // Determine best pricing
     if (days >= 28 && monthlyRate > 0) {
       const months = Math.ceil(days / 28);
-      price = monthlyRate * months * quantity;
+      rentalPrice = monthlyRate * months * quantity;
     } else if (days >= 7 && weeklyRate > 0) {
       const weeks = Math.ceil(days / 7);
-      price = weeklyRate * weeks * quantity;
+      rentalPrice = weeklyRate * weeks * quantity;
     } else if (days >= 2 && days <= 3 && weekendRate > 0) {
-      // Weekend rental (2-3 days) - more flexible than just Friday-Sunday
-      price = weekendRate * quantity;
+      rentalPrice = weekendRate * quantity;
     } else {
-      price = dailyRate * days * quantity;
+      rentalPrice = dailyRate * days * quantity;
     }
     
-    return price;
+    return { rentalPrice, deposit };
   };
 
-  const addToCart = async (equipment: WPEquipment, quantity: number) => {
-    if (!validateDates(selectedStartDate, selectedEndDate)) {
-      return;
-    }
+  const updateQuantity = (equipment: WPEquipment, quantity: number) => {
+    const newSelectedItems = new Map(selectedItems);
     
-    if (quantity <= 0) {
-      return;
-    }
-    
-    // Check availability for the selected period
-    const availableUnits = await checkAvailabilityForPeriod(equipment.id, selectedStartDate, selectedEndDate);
-    
-    if (quantity > availableUnits) {
-      alert(`Nur ${availableUnits} Einheiten verfügbar für den gewählten Zeitraum`);
-      return;
-    }
-    
-    const existingItemIndex = cart.items.findIndex(item => item.equipmentId === equipment.id);
-    const brand = equipment.meta?._equipment_brand || '';
-    const model = equipment.meta?._equipment_model || '';
-    
-    const cartItem: CartItem = {
-      equipmentId: equipment.id,
-      title: `${brand} ${model}`,
-      quantity,
-      dailyRate: equipment.meta?._tagesmiete || 0,
-      weekendRate: equipment.meta?._wochenendmiete || 0,
-      weeklyRate: equipment.meta?._wochenmiete || 0,
-      monthlyRate: equipment.meta?._monatsmiete || 0,
-      deposit: equipment.meta?._kaution || 0,
-      availableUnits
-    };
-    
-    let newItems;
-    if (existingItemIndex >= 0) {
-      newItems = [...cart.items];
-      newItems[existingItemIndex] = {
-        ...newItems[existingItemIndex],
-        quantity: newItems[existingItemIndex].quantity + quantity
-      };
+    if (quantity > 0) {
+      newSelectedItems.set(equipment.id, {
+        equipmentId: equipment.id,
+        equipment,
+        quantity,
+      });
     } else {
-      newItems = [...cart.items, cartItem];
+      newSelectedItems.delete(equipment.id);
     }
     
-    const totalPrice = newItems.reduce((total, item) => {
-      const itemPrice = calculatePrice(
-        equipment, 
-        item.quantity, 
-        selectedStartDate, 
+    setSelectedItems(newSelectedItems);
+  };
+
+  // Calculate totals
+  const calculation = useMemo(() => {
+    if (!selectedStartDate || !selectedEndDate || selectedItems.size === 0) {
+      return {
+        items: [],
+        subtotal: 0,
+        total: 0,
+      };
+    }
+
+    const items = Array.from(selectedItems.values()).map(item => {
+      const { rentalPrice } = calculatePrice(
+        item.equipment,
+        item.quantity,
+        selectedStartDate,
         selectedEndDate
       );
-      return total + itemPrice + (item.deposit * item.quantity);
-    }, 0);
-    
-    setCart({
-      items: newItems,
-      startDate: selectedStartDate,
-      endDate: selectedEndDate,
-      totalPrice
+      return {
+        ...item,
+        rentalPrice,
+        total: rentalPrice,
+      };
     });
-    
-    setIsCartOpen(true);
-  };
 
-  const removeFromCart = (equipmentId: number) => {
-    const newItems = cart.items.filter(item => item.equipmentId !== equipmentId);
-    
-    const totalPrice = newItems.reduce((total, item) => {
-      return total + (item.quantity * item.dailyRate) + (item.deposit * item.quantity);
-    }, 0);
-    
-    setCart({
-      ...cart,
-      items: newItems,
-      totalPrice
-    });
-  };
+    const subtotal = items.reduce((sum, item) => sum + item.rentalPrice, 0);
+    const total = subtotal;
 
-  const clearCart = () => {
-    setCart({
-      items: [],
-      startDate: '',
-      endDate: '',
-      totalPrice: 0
-    });
-    setIsCartOpen(false);
-  };
-
-  const handleCheckout = () => {
-    if (cart.items.length === 0) {
-      return;
-    }
-    
-    // Save cart to localStorage
-    localStorage.setItem('rentalCart', JSON.stringify(cart));
-    
-    // Navigate to checkout page
-    router.push('/checkout');
-  };
+    return {
+      items,
+      subtotal,
+      total,
+    };
+  }, [selectedItems, selectedStartDate, selectedEndDate]);
 
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('de-DE', {
       style: 'currency',
       currency: 'EUR'
     }).format(price);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateDates(selectedStartDate, selectedEndDate)) {
+      return;
+    }
+    
+    if (selectedItems.size === 0) {
+      setSubmitError('Bitte wählen Sie mindestens ein Equipment aus');
+      return;
+    }
+    
+    if (!customerData.name || !customerData.email) {
+      setSubmitError('Bitte füllen Sie alle Pflichtfelder aus');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setSubmitError('');
+    
+    try {
+      const cartData = Array.from(selectedItems.values()).map(item => ({
+        equipmentId: item.equipmentId,
+        title: `${item.equipment.meta?._equipment_brand || ''} ${item.equipment.meta?._equipment_model || ''}`.trim(),
+        quantity: item.quantity,
+      }));
+      
+      const response = await fetch('/api/wp/rental-bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          equipment: cartData,
+          rental_start: selectedStartDate,
+          rental_end: selectedEndDate,
+          customer_name: customerData.name,
+          customer_email: customerData.email,
+          customer_phone: customerData.phone,
+          customer_message: customerData.message,
+          booking_type: 'multi',
+          cart_data: JSON.stringify(cartData),
+        }),
+      });
+      
+      if (response.ok) {
+        setSubmitSuccess(true);
+        // Reset form
+        setSelectedItems(new Map());
+        setCustomerData({
+          name: '',
+          email: '',
+          phone: '',
+          message: '',
+        });
+        setSelectedStartDate('');
+        setSelectedEndDate('');
+      } else {
+        const error = await response.json();
+        setSubmitError(error.error || 'Fehler beim Senden der Anfrage');
+      }
+    } catch (error) {
+      console.error('Error submitting request:', error);
+      setSubmitError('Fehler beim Senden der Anfrage. Bitte versuchen Sie es erneut.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -407,7 +403,7 @@ export default function EquipmentRentalPage() {
           
           {/* Sidebar - Filters and Date Selection */}
           <div className="lg:w-80 flex-shrink-0">
-            <div className="bg-zinc-800 rounded-lg p-6 sticky top-4">
+            <div className="bg-zinc-800 rounded-lg p-6 sticky top-28">
               
               {/* Date Selection */}
               <div className="mb-8">
@@ -451,7 +447,7 @@ export default function EquipmentRentalPage() {
                   {selectedStartDate && selectedEndDate && !dateError && (
                     <div className="bg-green-900 border border-green-700 rounded-md p-3">
                       <p className="text-green-100 text-sm">
-                        {Math.ceil((new Date(selectedEndDate).getTime() - new Date(selectedStartDate).getTime()) / (1000 * 60 * 60 * 24))} Tage ausgewählt
+                        {Math.ceil((new Date(selectedEndDate).getTime() - new Date(selectedStartDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} Tage ausgewählt
                       </p>
                     </div>
                   )}
@@ -503,9 +499,10 @@ export default function EquipmentRentalPage() {
             </div>
           </div>
 
-          {/* Main Content - Equipment Grid */}
-          <div className="flex-1">
+          {/* Main Content */}
+          <div className="flex-1 space-y-8">
             
+            {/* Equipment Table */}
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-flex items-center gap-2 text-gray-400">
@@ -537,7 +534,7 @@ export default function EquipmentRentalPage() {
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Wochenende</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Woche</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Verfügbar</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Aktion</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Anzahl</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-700">
@@ -551,9 +548,9 @@ export default function EquipmentRentalPage() {
                         const weeklyRate = item.meta?._wochenmiete || 0;
                         const deposit = item.meta?._kaution || 0;
                         const totalUnits = item.meta?._equipment_menge || 1;
-                        const status = item.meta?._availability_status || 'verfügbar';
+                        const selectedItem = selectedItems.get(item.id);
+                        const quantity = selectedItem?.quantity || 0;
                         
-                        // Fallback display text when meta fields aren't available
                         const displayTitle = brand && model ? `${brand} ${model}` : title || `Equipment #${item.id}`;
                         const hasMetaData = !!(brand || model || dailyRate || weekendRate || weeklyRate);
                         
@@ -604,36 +601,21 @@ export default function EquipmentRentalPage() {
                               {totalUnits} Stück
                             </td>
                             <td className="px-4 py-4 whitespace-nowrap">
-                              {hasMetaData && status === 'verfügbar' && selectedStartDate && selectedEndDate && !dateError ? (
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="number"
-                                    id={`qty-${item.id}`}
-                                    min="1"
-                                    max={totalUnits}
-                                    defaultValue="1"
-                                    className="w-16 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  />
-                                  <button
-                                    onClick={() => {
-                                      const quantityInput = document.getElementById(`qty-${item.id}`) as HTMLInputElement;
-                                      const quantity = parseInt(quantityInput.value) || 1;
-                                      addToCart(item, quantity);
-                                    }}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors duration-200 whitespace-nowrap"
-                                  >
-                                    Hinzufügen
-                                  </button>
-                                </div>
+                              {hasMetaData ? (
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max={totalUnits}
+                                  value={quantity}
+                                  onChange={(e) => {
+                                    const newQuantity = parseInt(e.target.value) || 0;
+                                    updateQuantity(item, newQuantity);
+                                  }}
+                                  className="w-20 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
                               ) : (
                                 <div className="text-xs">
-                                  {!hasMetaData ? (
-                                    <span className="text-blue-400">Wird konfiguriert</span>
-                                  ) : status !== 'verfügbar' ? (
-                                    <span className="text-red-400">Nicht verfügbar</span>
-                                  ) : (
-                                    <span className="text-gray-400">Zeitraum wählen</span>
-                                  )}
+                                  <span className="text-blue-400">Wird konfiguriert</span>
                                 </div>
                               )}
                             </td>
@@ -645,87 +627,152 @@ export default function EquipmentRentalPage() {
                 </div>
               </div>
             )}
+
+            {/* Live Calculation */}
+            {selectedItems.size > 0 && (
+              <div className="bg-zinc-800 rounded-lg p-6 shadow-xl">
+                <h2 className="text-xl font-bold text-white mb-4">Preisberechnung</h2>
+                {selectedStartDate && selectedEndDate && !dateError ? (
+                  <div className="space-y-3">
+                    {calculation.items.map((item) => {
+                      const brand = item.equipment.meta?._equipment_brand || '';
+                      const model = item.equipment.meta?._equipment_model || '';
+                      const title = `${brand} ${model}`.trim() || `Equipment #${item.equipmentId}`;
+                      
+                      return (
+                        <div key={item.equipmentId} className="flex justify-between items-center py-2 border-b border-zinc-700">
+                          <div>
+                            <div className="text-white font-medium">{title}</div>
+                            <div className="text-sm text-gray-400">{item.quantity}x</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-white font-medium">{formatPrice(item.total)}</div>
+                            <div className="text-xs text-gray-400">
+                              {formatPrice(item.rentalPrice)} Miete
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div className="pt-3 space-y-2">
+                      <div className="flex justify-between text-xl font-bold text-white pt-2 border-t border-zinc-700">
+                        <span>Gesamtpreis (Miete):</span>
+                        <span>{formatPrice(calculation.total)}</span>
+                      </div>
+                      <div className="mt-3 p-3 bg-blue-900/30 border border-blue-700/50 rounded-md">
+                        <p className="text-sm text-blue-200">
+                          <span className="font-semibold">Hinweis:</span> Eine angemessene Kaution wird dem finalen Angebot hinzugefügt.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-gray-400 text-center py-4">
+                    <p>Bitte wählen Sie einen Mietzeitraum aus, um die Preisberechnung zu sehen.</p>
+                    <div className="mt-4 space-y-2">
+                      {Array.from(selectedItems.values()).map((item) => {
+                        const brand = item.equipment.meta?._equipment_brand || '';
+                        const model = item.equipment.meta?._equipment_model || '';
+                        const title = `${brand} ${model}`.trim() || `Equipment #${item.equipmentId}`;
+                        return (
+                          <div key={item.equipmentId} className="flex justify-between text-sm">
+                            <span>{title}</span>
+                            <span>{item.quantity}x</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Customer Data Form */}
+            <form onSubmit={handleSubmit} className="bg-zinc-800 rounded-lg p-6 shadow-xl space-y-6">
+                <h2 className="text-xl font-bold text-white mb-4">Ihre Kontaktdaten</h2>
+                
+                {submitSuccess && (
+                  <div className="bg-green-900 border border-green-700 rounded-md p-4">
+                    <p className="text-green-100">
+                      Ihre Anfrage wurde erfolgreich gesendet! Wir melden uns in Kürze bei Ihnen.
+                    </p>
+                  </div>
+                )}
+                
+                {submitError && (
+                  <div className="bg-red-900 border border-red-700 rounded-md p-4">
+                    <p className="text-red-100">{submitError}</p>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="customer-name" className="block text-sm font-medium text-gray-300 mb-2">
+                      Name <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="customer-name"
+                      required
+                      value={customerData.name}
+                      onChange={(e) => setCustomerData({ ...customerData, name: e.target.value })}
+                      className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="customer-email" className="block text-sm font-medium text-gray-300 mb-2">
+                      E-Mail <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="customer-email"
+                      required
+                      value={customerData.email}
+                      onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
+                      className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="customer-phone" className="block text-sm font-medium text-gray-300 mb-2">
+                      Telefon
+                    </label>
+                    <input
+                      type="tel"
+                      id="customer-phone"
+                      value={customerData.phone}
+                      onChange={(e) => setCustomerData({ ...customerData, phone: e.target.value })}
+                      className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label htmlFor="customer-message" className="block text-sm font-medium text-gray-300 mb-2">
+                    Nachricht (optional)
+                  </label>
+                  <textarea
+                    id="customer-message"
+                    rows={4}
+                    value={customerData.message}
+                    onChange={(e) => setCustomerData({ ...customerData, message: e.target.value })}
+                    placeholder="Besondere Wünsche oder Anmerkungen..."
+                    className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-md font-medium transition-colors"
+                >
+                  {isSubmitting ? 'Wird gesendet...' : 'Anfrage senden'}
+                </button>
+              </form>
           </div>
         </div>
       </div>
-
-      {/* Floating Cart */}
-      {cart.items.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <div className={`bg-white rounded-lg shadow-2xl border transition-all duration-300 ${
-            isCartOpen ? 'w-96' : 'w-auto'
-          }`}>
-            {/* Cart Header */}
-            <div
-              className="flex items-center justify-between p-4 bg-zinc-800 text-white rounded-t-lg cursor-pointer"
-              onClick={() => setIsCartOpen(!isCartOpen)}
-            >
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13h10M9 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM20.5 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                </svg>
-                <span className="font-medium">Warenkorb ({cart.items.length})</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold">{formatPrice(cart.totalPrice)}</span>
-                <svg className={`w-4 h-4 transition-transform ${isCartOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Cart Content */}
-            {isCartOpen && (
-              <div className="p-4">
-                {/* Rental Period */}
-                <div className="mb-4 p-3 bg-gray-50 rounded-md">
-                  <div className="text-sm font-medium text-gray-900">Mietzeitraum:</div>
-                  <div className="text-sm text-gray-600">
-                    {new Date(cart.startDate).toLocaleDateString('de-DE')} - {new Date(cart.endDate).toLocaleDateString('de-DE')}
-                  </div>
-                </div>
-
-                {/* Cart Items */}
-                <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
-                  {cart.items.map((item) => (
-                    <div key={item.equipmentId} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <div className="flex-1">
-                        <div className="font-medium text-sm text-gray-900">{item.title}</div>
-                        <div className="text-xs text-gray-600">{item.quantity}x</div>
-                      </div>
-                      <button
-                        onClick={() => removeFromCart(item.equipmentId)}
-                        className="text-red-600 hover:text-red-800 p-1"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Cart Actions */}
-                <div className="space-y-2">
-                  <button
-                    onClick={handleCheckout}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                  >
-                    Zur Kasse
-                  </button>
-                  <button
-                    onClick={clearCart}
-                    className="w-full bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                  >
-                    Warenkorb leeren
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
 
       {/* Contact Footer */}
       <ContactFooter />
