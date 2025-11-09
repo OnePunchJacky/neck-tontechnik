@@ -240,6 +240,46 @@ export interface WPPage {
   _links: Record<string, any>;
 }
 
+export interface WPRentalBooking {
+  id: number;
+  date: string;
+  date_gmt: string;
+  guid: { rendered: string };
+  modified: string;
+  modified_gmt: string;
+  slug: string;
+  status: 'publish' | 'draft' | 'private' | 'pending';
+  type: string;
+  link: string;
+  title: { rendered: string };
+  content: { rendered: string };
+  excerpt: { rendered: string };
+  author: number;
+  featured_media: number;
+  comment_status: string;
+  ping_status: string;
+  sticky: boolean;
+  template: string;
+  format: string;
+  meta: {
+    _equipment_id?: number;
+    _quantity?: number;
+    _rental_start?: string;
+    _rental_end?: string;
+    _customer_name?: string;
+    _customer_email?: string;
+    _customer_phone?: string;
+    _customer_message?: string;
+    _booking_status?: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+    _booking_date?: string;
+    _booking_type?: 'single' | 'multi' | null;
+    _cart_data?: string; // JSON string for multi-bookings
+    _total_items?: number;
+    _total_quantity?: number;
+  };
+  _links: Record<string, any>;
+}
+
 export interface WPSession {
   user: {
     id: number;

@@ -1155,6 +1155,39 @@ function save_rental_booking_meta($post_id) {
 }
 add_action('save_post', 'save_rental_booking_meta');
 
+// Register rental booking meta fields for REST API
+function register_rental_booking_meta_for_rest_api() {
+    $meta_fields = array(
+        '_equipment_id' => 'integer',
+        '_quantity' => 'integer',
+        '_rental_start' => 'string',
+        '_rental_end' => 'string',
+        '_customer_name' => 'string',
+        '_customer_email' => 'string',
+        '_customer_phone' => 'string',
+        '_customer_message' => 'string',
+        '_booking_status' => 'string',
+        '_booking_date' => 'string',
+        '_booking_type' => 'string',
+        '_cart_data' => 'string',
+        '_total_items' => 'integer',
+        '_total_quantity' => 'integer',
+    );
+    
+    foreach ($meta_fields as $meta_field => $type) {
+        register_meta('post', $meta_field, array(
+            'object_subtype' => 'rental_booking',
+            'type' => $type,
+            'single' => true,
+            'show_in_rest' => true,
+            'auth_callback' => function() {
+                return current_user_can('edit_posts');
+            }
+        ));
+    }
+}
+add_action('init', 'register_rental_booking_meta_for_rest_api');
+
 // Shortcode for multi-equipment rental cart
 function equipment_rental_cart_shortcode($atts) {
     $atts = shortcode_atts(array(

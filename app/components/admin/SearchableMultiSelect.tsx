@@ -169,7 +169,7 @@ export default function SearchableMultiSelect({
       {/* Helper text */}
       {selectedOptions.length > 0 && (
         <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-          {selectedOptions.length} {selectedOptions.length === 1 ? 'Artist ausgewählt' : 'Artists ausgewählt'}
+          {selectedOptions.length} {selectedOptions.length === 1 ? 'Element ausgewählt' : 'Elemente ausgewählt'}
         </p>
       )}
     </div>

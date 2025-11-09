@@ -382,6 +382,34 @@ export class WordPressAPI {
     const response = await this.client.post('/users/me', payload);
     return response.data;
   }
+
+  // Rental Booking operations
+  async getRentalBookings(params?: Record<string, any>) {
+    const response = await this.client.get('/rental_booking', { params: { per_page: 100, ...params } });
+    return response.data;
+  }
+
+  async getRentalBooking(id: number) {
+    const response = await this.client.get(`/rental_booking/${id}`);
+    return response.data;
+  }
+
+  async createRentalBooking(data: Record<string, any>) {
+    const response = await this.client.post('/rental_booking', data);
+    return response.data;
+  }
+
+  async updateRentalBooking(id: number, data: Record<string, any>) {
+    const response = await this.client.post(`/rental_booking/${id}`, data);
+    return response.data;
+  }
+
+  async deleteRentalBooking(id: number, force: boolean = true) {
+    const response = await this.client.delete(`/rental_booking/${id}`, {
+      params: { force },
+    });
+    return response.data;
+  }
 }
 
 export const wpApi = new WordPressAPI();

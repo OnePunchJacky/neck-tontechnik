@@ -20,6 +20,7 @@ import {
   ChevronRight,
   Globe,
   FolderOpen,
+  Calendar,
 } from 'lucide-react';
 
 interface NavItem {
@@ -49,7 +50,14 @@ const navItems: NavItem[] = [
       { href: '/manage/audio-samples', label: 'Audio-Samples', icon: Headphones },
     ],
   },
-  { href: '/manage/equipment', label: 'Equipment-Verleih', icon: Settings },
+  {
+    label: 'Equipment-Verleih',
+    icon: Settings,
+    children: [
+      { href: '/manage/equipment', label: 'Equipment', icon: Settings },
+      { href: '/manage/equipment/rentals', label: 'Vermietungen', icon: Calendar },
+    ],
+  },
   { href: '/manage/artists', label: 'Künstler', icon: Users },
   { href: '/manage/settings', label: 'Einstellungen', icon: UserCog },
 ];
@@ -91,10 +99,15 @@ export default function AdminNav() {
 
   const isItemActive = (item: NavItem): boolean => {
     if (item.href) {
+      // For items with href, check exact match or if it's a parent path
+      // But only if it doesn't have children (children are handled separately)
+      if (item.children) {
+        return false; // Parent items with children are not directly active
+      }
       return pathname === item.href || (item.href !== '/manage' && pathname.startsWith(item.href + '/'));
     }
     if (item.children) {
-      return item.children.some((child) => child.href && (pathname === child.href || pathname.startsWith(child.href + '/')));
+      return item.children.some((child) => child.href && pathname === child.href);
     }
     return false;
   };
@@ -146,7 +159,8 @@ export default function AdminNav() {
           >
             <div className="ml-4 mt-1 space-y-1 border-l-2 border-[var(--color-border)] pl-4">
               {item.children.map((child) => {
-                const isChildActive = child.href && (pathname === child.href || pathname.startsWith(child.href + '/'));
+                // Only exact match for child items to avoid highlighting multiple items
+                const isChildActive = child.href && pathname === child.href;
                 const ChildIcon = child.icon;
                 return (
                   <Link
