@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/app/lib/auth';
 import { WordPressAPI } from '@/app/lib/wp-api';
+import { revalidatePath } from 'next/cache';
 
 export async function GET(
   request: NextRequest,
@@ -207,6 +208,25 @@ export async function PUT(
       } else {
         throw error;
       }
+    }
+    
+    // Trigger revalidation for the updated page
+    try {
+      // Map slug to path
+      const pathMap: Record<string, string> = {
+        'agb': '/agb',
+        'impressum': '/impressum',
+        'datenschutz': '/datenschutz',
+        'ueber-mich': '/ueber-mich',
+      };
+      
+      const pathToRevalidate = pathMap[slug];
+      if (pathToRevalidate) {
+        revalidatePath(pathToRevalidate);
+      }
+    } catch (revalidateError) {
+      console.error('Error triggering revalidation:', revalidateError);
+      // Don't fail the request if revalidation fails
     }
     
     return NextResponse.json(updatedPage);
