@@ -54,21 +54,21 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: 'Live References',
+      title: 'Live-Referenzen',
       count: liveReferences.length,
       href: '/manage/live-references',
       icon: '🎤',
       color: 'bg-blue-500/10 border-blue-500/50',
     },
     {
-      title: 'Recordings',
+      title: 'Aufnahmen',
       count: recordings.length,
       href: '/manage/recordings',
       icon: '🎵',
       color: 'bg-green-500/10 border-green-500/50',
     },
     {
-      title: 'Audio Samples',
+      title: 'Audio-Samples',
       count: audioSamples.length,
       href: '/manage/audio-samples',
       icon: '🎧',
@@ -82,7 +82,7 @@ export default function DashboardPage() {
       color: 'bg-orange-500/10 border-orange-500/50',
     },
     {
-      title: 'Artists',
+      title: 'Künstler',
       count: artists.length,
       href: '/manage/artists',
       icon: '👤',
@@ -92,8 +92,8 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-8">
-        Dashboard
+      <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-6">
+        Übersicht
       </h1>
 
       {isLoading ? (
@@ -132,7 +132,7 @@ export default function DashboardPage() {
             className="p-4 bg-[var(--color-surface-light)] border border-[var(--color-border)] rounded-lg hover:opacity-80 transition-opacity"
           >
             <div className="text-2xl mb-2">🖼️</div>
-            <div className="font-medium text-[var(--color-text-primary)]">Media Library</div>
+            <div className="font-medium text-[var(--color-text-primary)]">Medien</div>
             <div className="text-sm text-[var(--color-text-secondary)] mt-1">
               Medien hochladen und verwalten
             </div>
