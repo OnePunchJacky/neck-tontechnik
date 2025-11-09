@@ -390,14 +390,14 @@ export default function EquipmentRentalPage() {
   return (
     <div className="min-h-screen bg-zinc-900">
       {/* Hero Section */}
-      <section className="relative py-20 md:py-32 overflow-hidden min-h-[80vh] flex items-center">
+      <section className="relative pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden flex items-center">
         <div className="absolute inset-0 z-0 bg-[url('/images/studio-bg.jpg')] bg-cover bg-center bg-fixed opacity-20"></div>
         <div className="relative z-10 max-w-4xl mx-auto text-center px-4 md:px-8">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-2xl">
             Equipment Verleih
           </h1>
-          <p className="text-xl md:text-2xl text-white leading-relaxed drop-shadow-2xl mb-8">
-            Professionelle Tontechnik mieten - von Mikrofonen bis Beschallungsanlagen
+          <p className="text-xl md:text-2xl text-white leading-relaxed drop-shadow-2xl">
+            Professionelle Tontechnik mieten
           </p>
         </div>
       </section>
@@ -526,162 +526,123 @@ export default function EquipmentRentalPage() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredEquipment.map((item) => {
-                  const categories = item._embedded?.['wp:term']?.[0] || [];
-                  const brand = item.meta?._equipment_brand || '';
-                  const model = item.meta?._equipment_model || '';
-                  const title = item.title?.rendered || '';
-                  const dailyRate = item.meta?._tagesmiete || 0;
-                  const weekendRate = item.meta?._wochenendmiete || 0;
-                  const weeklyRate = item.meta?._wochenmiete || 0;
-                  const deposit = item.meta?._kaution || 0;
-                  const totalUnits = item.meta?._equipment_menge || 1; // Default to 1 unit
-                  const status = item.meta?._availability_status || 'verfügbar';
-                  
-                  // Fallback display text when meta fields aren't available
-                  const displayTitle = brand && model ? `${brand} ${model}` : title || `Equipment #${item.id}`;
-                  const hasMetaData = !!(brand || model || dailyRate || weekendRate || weeklyRate);
-                  
-                  return (
-                    <div
-                      key={item.id}
-                      className="bg-zinc-800 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 group"
-                    >
-                      {/* Equipment Image */}
-                      <div className="relative h-48 bg-zinc-700 overflow-hidden">
-                        {item._embedded?.['wp:featuredmedia']?.[0] ? (
-                          <img
-                            src={item._embedded['wp:featuredmedia'][0].media_details?.sizes?.medium?.source_url || item._embedded['wp:featuredmedia'][0].source_url}
-                            alt={`${brand} ${model}`}
-                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-700">
-                            <svg className="w-16 h-16 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Content */}
-                      <div className="p-6">
-                        {/* Categories */}
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {categories.map((category) => (
-                            <span
-                              key={category.id}
-                              className={`text-xs font-medium px-2.5 py-0.5 rounded ${getCategoryColor(category.name)}`}
-                            >
-                              {category.name}
-                            </span>
-                          ))}
-                        </div>
+              <div className="bg-zinc-800 rounded-lg overflow-hidden shadow-xl">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-zinc-700">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Equipment</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Kategorien</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Tagesmiete</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Wochenende</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Woche</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Verfügbar</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Aktion</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-700">
+                      {filteredEquipment.map((item) => {
+                        const categories = item._embedded?.['wp:term']?.[0] || [];
+                        const brand = item.meta?._equipment_brand || '';
+                        const model = item.meta?._equipment_model || '';
+                        const title = item.title?.rendered || '';
+                        const dailyRate = item.meta?._tagesmiete || 0;
+                        const weekendRate = item.meta?._wochenendmiete || 0;
+                        const weeklyRate = item.meta?._wochenmiete || 0;
+                        const deposit = item.meta?._kaution || 0;
+                        const totalUnits = item.meta?._equipment_menge || 1;
+                        const status = item.meta?._availability_status || 'verfügbar';
                         
-                        {/* Title */}
-                        <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                          {displayTitle}
-                        </h3>
+                        // Fallback display text when meta fields aren't available
+                        const displayTitle = brand && model ? `${brand} ${model}` : title || `Equipment #${item.id}`;
+                        const hasMetaData = !!(brand || model || dailyRate || weekendRate || weeklyRate);
                         
-                        {/* Debug info when meta data is missing */}
-                        {!hasMetaData && (
-                          <div className="text-xs text-yellow-400 mb-2 p-2 bg-yellow-900/20 rounded">
-                            <p>Debug: Meta fields not available via REST API</p>
-                            <p>Raw title: {title || 'No title'}</p>
-                            <p>Item ID: {item.id}</p>
-                          </div>
-                        )}
-                        
-                        {/* Pricing */}
-                        <div className="space-y-1 mb-4">
-                          {hasMetaData ? (
-                            <>
-                              {dailyRate > 0 && (
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-[var(--color-text-muted)]">Tagesmiete:</span>
-                                  <span className="text-white font-medium">{formatPrice(dailyRate)}</span>
+                        return (
+                          <tr key={item.id} className="hover:bg-zinc-700/50 transition-colors">
+                            <td className="px-4 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-3">
+                                {item._embedded?.['wp:featuredmedia']?.[0] && (
+                                  <div className="w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-zinc-700">
+                                    <img
+                                      src={item._embedded['wp:featuredmedia'][0].media_details?.sizes?.medium?.source_url || item._embedded['wp:featuredmedia'][0].source_url}
+                                      alt={`${brand} ${model}`}
+                                      className="w-full h-full object-cover"
+                                      loading="lazy"
+                                    />
+                                  </div>
+                                )}
+                                <div>
+                                  <div className="text-sm font-medium text-white">{displayTitle}</div>
+                                  {!hasMetaData && (
+                                    <div className="text-xs text-yellow-400 mt-1">Wird konfiguriert</div>
+                                  )}
                                 </div>
-                              )}
-                              {weekendRate > 0 && (
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-[var(--color-text-muted)]">Wochenende:</span>
-                                  <span className="text-white font-medium">{formatPrice(weekendRate)}</span>
-                                </div>
-                              )}
-                              {weeklyRate > 0 && (
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-[var(--color-text-muted)]">Wochenmiete:</span>
-                                  <span className="text-white font-medium">{formatPrice(weeklyRate)}</span>
-                                </div>
-                              )}
-                              {deposit > 0 && (
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-[var(--color-text-muted)]">Kaution:</span>
-                                  <span className="text-orange-400 font-medium">{formatPrice(deposit)}</span>
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            <div className="text-sm text-gray-400">
-                              Preise werden geladen...
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Availability */}
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-[var(--color-text-muted)] text-sm">Verfügbar:</span>
-                          <span className="text-white font-medium">{totalUnits} Stück</span>
-                        </div>
-                        
-                        {/* Quantity and Add to Cart */}
-                        {hasMetaData && status === 'verfügbar' && selectedStartDate && selectedEndDate && !dateError ? (
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-3">
-                              <label htmlFor={`qty-${item.id}`} className="text-[var(--color-text-secondary)] text-sm">
-                                Anzahl:
-                              </label>
-                              <input
-                                type="number"
-                                id={`qty-${item.id}`}
-                                min="1"
-                                max={totalUnits}
-                                defaultValue="1"
-                                className="w-20 px-2 py-1 bg-[var(--color-surface-light)] border border-[var(--color-neutral)] rounded text-[var(--color-text-primary)] text-center focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                              />
-                            </div>
-                            <button
-                              onClick={() => {
-                                const quantityInput = document.getElementById(`qty-${item.id}`) as HTMLInputElement;
-                                const quantity = parseInt(quantityInput.value) || 1;
-                                addToCart(item, quantity);
-                              }}
-                              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                            >
-                              Zum Warenkorb hinzufügen
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="text-center">
-                            {!hasMetaData ? (
-                              <div className="bg-blue-900/20 border border-blue-600 rounded p-3">
-                                <span className="text-blue-400 text-sm">
-                                  Equipment wird konfiguriert - bald verfügbar
-                                </span>
                               </div>
-                            ) : status !== 'verfügbar' ? (
-                              <span className="text-red-400 text-sm">Derzeit nicht verfügbar</span>
-                            ) : (
-                              <span className="text-gray-400 text-sm">Bitte Mietzeitraum wählen</span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="flex flex-wrap gap-1">
+                                {categories.map((category) => (
+                                  <span
+                                    key={category.id}
+                                    className={`text-xs font-medium px-2 py-0.5 rounded ${getCategoryColor(category.name)}`}
+                                  >
+                                    {category.name}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap text-sm text-white">
+                              {dailyRate > 0 ? formatPrice(dailyRate) : '-'}
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap text-sm text-white">
+                              {weekendRate > 0 ? formatPrice(weekendRate) : '-'}
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap text-sm text-white">
+                              {weeklyRate > 0 ? formatPrice(weeklyRate) : '-'}
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap text-sm text-white">
+                              {totalUnits} Stück
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap">
+                              {hasMetaData && status === 'verfügbar' && selectedStartDate && selectedEndDate && !dateError ? (
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="number"
+                                    id={`qty-${item.id}`}
+                                    min="1"
+                                    max={totalUnits}
+                                    defaultValue="1"
+                                    className="w-16 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-white text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      const quantityInput = document.getElementById(`qty-${item.id}`) as HTMLInputElement;
+                                      const quantity = parseInt(quantityInput.value) || 1;
+                                      addToCart(item, quantity);
+                                    }}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors duration-200 whitespace-nowrap"
+                                  >
+                                    Hinzufügen
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="text-xs">
+                                  {!hasMetaData ? (
+                                    <span className="text-blue-400">Wird konfiguriert</span>
+                                  ) : status !== 'verfügbar' ? (
+                                    <span className="text-red-400">Nicht verfügbar</span>
+                                  ) : (
+                                    <span className="text-gray-400">Zeitraum wählen</span>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
