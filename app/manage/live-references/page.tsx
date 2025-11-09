@@ -50,9 +50,17 @@ export default function LiveReferencesPage() {
     return decoded.replace(/<[^>]*>/g, '').trim();
   };
 
+  // Helper function to decode HTML entities in title
+  const decodeHtmlEntities = (text: string): string => {
+    if (!text) return text;
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+  };
+
   const handleEdit = (reference: WPLiveReference) => {
     setFormData({
-      title: reference.title.rendered || '',
+      title: decodeHtmlEntities(reference.title.rendered || ''),
       content: decodeHtmlContent(reference.content.rendered || ''),
       status: reference.status,
     });

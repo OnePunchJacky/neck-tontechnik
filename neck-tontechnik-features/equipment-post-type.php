@@ -16,7 +16,7 @@ function register_gear_post_type()
     $args = array(
         'label'                 => __('Equipment', 'text_domain'),
         'labels'                => $labels,
-        'supports'              => array('custom-fields'),
+        'supports'              => array('title', 'custom-fields'),
         'hierarchical'          => false,
         'public'                => true,
         'show_ui'               => true,
@@ -375,14 +375,9 @@ function add_equipment_meta_to_rest_api() {
     );
 
     foreach ($meta_fields as $meta_field) {
-        register_rest_field('gear', $meta_field, array(
+        register_rest_field('gear', str_replace('_', '', $meta_field), array(
             'get_callback' => function($object) use ($meta_field) {
-                $value = get_post_meta($object['id'], $meta_field, true);
-                // Convert numeric fields to proper numbers
-                if (in_array($meta_field, ['_equipment_menge', '_equipment_preis', '_tagesmiete', '_wochenendmiete', '_wochenmiete', '_monatsmiete', '_kaution', '_insurance_value'])) {
-                    return $value ? (float)$value : 0;
-                }
-                return $value ?: '';
+                return get_post_meta($object['id'], $meta_field, true);
             },
             'update_callback' => function($value, $object) use ($meta_field) {
                 return update_post_meta($object->ID, $meta_field, $value);
@@ -505,4 +500,34 @@ function equipment_columns_orderby($query) {
         $query->set('orderby', 'meta_value_num');
     }
 }
-add_action('pre_get_posts', 'equipment_columns_orderby'); 
+add_action('pre_get_posts', 'equipment_columns_orderby');
+
+// Ensure title is saved when updating via REST API
+function save_equipment_title_via_rest($post, $request) {
+    // Only process gear post type
+    if ($post->post_type !== 'gear') {
+        return $post;
+    }
+    
+    // Get the title from the request
+    $params = $request->get_json_params();
+    if (isset($params['title']) && !empty($params['title'])) {
+        // Remove the filter to prevent infinite recursion
+        remove_filter('rest_after_insert_gear', 'save_equipment_title_via_rest');
+        remove_filter('rest_after_update_gear', 'save_equipment_title_via_rest');
+        
+        // Update the post title
+        wp_update_post(array(
+            'ID' => $post->ID,
+            'post_title' => sanitize_text_field($params['title'])
+        ));
+        
+        // Re-add the filters
+        add_filter('rest_after_insert_gear', 'save_equipment_title_via_rest', 10, 2);
+        add_filter('rest_after_update_gear', 'save_equipment_title_via_rest', 10, 2);
+    }
+    
+    return $post;
+}
+add_filter('rest_after_insert_gear', 'save_equipment_title_via_rest', 10, 2);
+add_filter('rest_after_update_gear', 'save_equipment_title_via_rest', 10, 2); 

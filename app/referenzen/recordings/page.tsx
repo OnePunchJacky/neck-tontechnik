@@ -256,8 +256,8 @@ export default function RecordingsPage() {
                     key={recording.id}
                     className="bg-[var(--color-surface)] rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 group"
                   >
-                    {/* Album Cover */}
-                    <div className="relative h-64 bg-[var(--color-surface-light)] overflow-hidden">
+                    {/* Album Cover - Square */}
+                    <div className="relative w-full aspect-square bg-[var(--color-surface-light)] overflow-hidden">
                       {recording.coverImage?.source_url ? (
                         <>
                           {/* Using regular img tag for better debugging */}

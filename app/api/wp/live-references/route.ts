@@ -30,12 +30,37 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Helper function to decode HTML entities
+function decodeHtmlEntities(text: string): string {
+  if (!text) return text;
+  // Use a simple approach: replace common HTML entities
+  return text
+    .replace(/&#8211;/g, '–')
+    .replace(/&#8212;/g, '—')
+    .replace(/&#038;/g, '&')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#8217;/g, "'")
+    .replace(/&#8220;/g, '"')
+    .replace(/&#8221;/g, '"')
+    .replace(/&nbsp;/g, ' ');
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth();
     const wpApi = new WordPressAPI(session.token);
 
     const body = await request.json();
+    
+    // Decode HTML entities in title to prevent double-encoding
+    if (body.title && typeof body.title === 'string') {
+      body.title = decodeHtmlEntities(body.title);
+    }
+    
     const post = await wpApi.createPost('live_reference', body);
     return NextResponse.json(post);
   } catch (error: any) {

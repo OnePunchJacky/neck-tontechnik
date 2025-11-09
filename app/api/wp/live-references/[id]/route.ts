@@ -25,6 +25,25 @@ export async function GET(
   }
 }
 
+// Helper function to decode HTML entities
+function decodeHtmlEntities(text: string): string {
+  if (!text) return text;
+  // Use a simple approach: replace common HTML entities
+  return text
+    .replace(/&#8211;/g, '–')
+    .replace(/&#8212;/g, '—')
+    .replace(/&#038;/g, '&')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#8217;/g, "'")
+    .replace(/&#8220;/g, '"')
+    .replace(/&#8221;/g, '"')
+    .replace(/&nbsp;/g, ' ');
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -37,6 +56,11 @@ export async function PUT(
 
     // Separate ACF fields from regular post data
     const { acf, ...postData } = body;
+    
+    // Decode HTML entities in title to prevent double-encoding
+    if (postData.title && typeof postData.title === 'string') {
+      postData.title = decodeHtmlEntities(postData.title);
+    }
     
     // Update the post with all data including ACF fields
     // ACF fields should be sent directly in the 'acf' object

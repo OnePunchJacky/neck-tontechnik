@@ -38,8 +38,26 @@ export async function PUT(
     // Separate meta fields from regular post data
     const { meta, ...postData } = body;
     
-    // Update the post first
-    let updatedPost = await wpApi.updatePost('gear', parseInt(id), postData);
+    // Ensure title is included in postData if provided
+    // WordPress REST API should accept title even if post type doesn't explicitly support it
+    const updatePayload: Record<string, any> = {};
+    if (postData.title !== undefined) {
+      updatePayload.title = postData.title;
+    }
+    if (postData.status !== undefined) {
+      updatePayload.status = postData.status;
+    }
+    if (postData.featured_media !== undefined) {
+      updatePayload.featured_media = postData.featured_media;
+    }
+    
+    // Update the post first (with title, status, featured_media)
+    let updatedPost;
+    if (Object.keys(updatePayload).length > 0) {
+      updatedPost = await wpApi.updatePost('gear', parseInt(id), updatePayload);
+    } else {
+      updatedPost = await wpApi.getPost('gear', parseInt(id));
+    }
     
     // Handle meta fields separately for equipment (these are custom meta, not ACF)
     if (meta && Object.keys(meta).length > 0) {
@@ -60,8 +78,16 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     console.error('Error updating equipment:', error);
+    console.error('Error details:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
     return NextResponse.json(
-      { error: 'Failed to update equipment' },
+      { 
+        error: 'Failed to update equipment',
+        details: error.response?.data || error.message,
+      },
       { status: 500 }
     );
   }

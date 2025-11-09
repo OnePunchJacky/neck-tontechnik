@@ -95,28 +95,69 @@ export default function EquipmentPage() {
     e.preventDefault();
 
     try {
+      // Equipment post type only supports 'custom-fields', so we need to provide a title
+      // The PHP plugin auto-generates title from brand + model, but we still need to provide one for creation
+      const title = formData.title || 
+        (metaFields._equipment_brand && metaFields._equipment_model 
+          ? `${metaFields._equipment_brand} ${metaFields._equipment_model}`
+          : metaFields._equipment_brand || metaFields._equipment_model || 'Equipment');
+      
+      // Build meta object, only including fields with actual values (not null, not empty strings)
+      const meta: Record<string, any> = {};
+      
+      // String fields - only include if not empty
+      if (metaFields._equipment_brand) meta._equipment_brand = metaFields._equipment_brand;
+      if (metaFields._equipment_model) meta._equipment_model = metaFields._equipment_model;
+      if (metaFields._location) meta._location = metaFields._location;
+      if (metaFields._rental_notes) meta._rental_notes = metaFields._rental_notes;
+      if (metaFields._last_maintenance) meta._last_maintenance = metaFields._last_maintenance;
+      if (metaFields._next_maintenance) meta._next_maintenance = metaFields._next_maintenance;
+      if (metaFields._availability_status) meta._availability_status = metaFields._availability_status;
+      
+      // Numeric fields - only include if they have a value
+      const menge = parseInt(metaFields._equipment_menge);
+      if (!isNaN(menge) && menge > 0) meta._equipment_menge = menge;
+      
+      if (metaFields._equipment_preis) {
+        const preis = parseFloat(metaFields._equipment_preis);
+        if (!isNaN(preis)) meta._equipment_preis = preis;
+      }
+      
+      if (metaFields._tagesmiete) {
+        const tagesmiete = parseFloat(metaFields._tagesmiete);
+        if (!isNaN(tagesmiete)) meta._tagesmiete = tagesmiete;
+      }
+      
+      if (metaFields._wochenendmiete) {
+        const wochenendmiete = parseFloat(metaFields._wochenendmiete);
+        if (!isNaN(wochenendmiete)) meta._wochenendmiete = wochenendmiete;
+      }
+      
+      if (metaFields._wochenmiete) {
+        const wochenmiete = parseFloat(metaFields._wochenmiete);
+        if (!isNaN(wochenmiete)) meta._wochenmiete = wochenmiete;
+      }
+      
+      if (metaFields._monatsmiete) {
+        const monatsmiete = parseFloat(metaFields._monatsmiete);
+        if (!isNaN(monatsmiete)) meta._monatsmiete = monatsmiete;
+      }
+      
+      if (metaFields._kaution) {
+        const kaution = parseFloat(metaFields._kaution);
+        if (!isNaN(kaution)) meta._kaution = kaution;
+      }
+      
+      if (metaFields._insurance_value) {
+        const insurance = parseFloat(metaFields._insurance_value);
+        if (!isNaN(insurance)) meta._insurance_value = insurance;
+      }
+      
       const payload: any = {
-        title: formData.title,
-        content: formData.content,
+        title: title,
         status: formData.status,
         featured_media: formData.featured_media ? parseInt(formData.featured_media) : 0,
-        meta: {
-          _equipment_brand: metaFields._equipment_brand,
-          _equipment_model: metaFields._equipment_model,
-          _equipment_menge: parseInt(metaFields._equipment_menge) || 1,
-          _equipment_preis: metaFields._equipment_preis ? parseFloat(metaFields._equipment_preis) : null,
-          _tagesmiete: metaFields._tagesmiete ? parseFloat(metaFields._tagesmiete) : null,
-          _wochenendmiete: metaFields._wochenendmiete ? parseFloat(metaFields._wochenendmiete) : null,
-          _wochenmiete: metaFields._wochenmiete ? parseFloat(metaFields._wochenmiete) : null,
-          _monatsmiete: metaFields._monatsmiete ? parseFloat(metaFields._monatsmiete) : null,
-          _kaution: metaFields._kaution ? parseFloat(metaFields._kaution) : null,
-          _availability_status: metaFields._availability_status,
-          _insurance_value: metaFields._insurance_value ? parseFloat(metaFields._insurance_value) : null,
-          _location: metaFields._location,
-          _rental_notes: metaFields._rental_notes,
-          _last_maintenance: metaFields._last_maintenance,
-          _next_maintenance: metaFields._next_maintenance,
-        },
+        meta: meta,
       };
 
       const url = editingId
@@ -154,7 +195,8 @@ export default function EquipmentPage() {
         refreshEquipment();
       } else {
         const error = await response.json();
-        alert(error.error || 'Fehler beim Speichern');
+        console.error('Error response:', error);
+        alert(error.error || error.details || 'Fehler beim Speichern');
       }
     } catch (error) {
       console.error('Error saving equipment:', error);
