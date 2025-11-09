@@ -32,13 +32,13 @@ export default function RentalBookingForm({
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerMessage, setCustomerMessage] = useState('');
-  const [bookingStatus, setBookingStatus] = useState<'pending' | 'confirmed' | 'cancelled' | 'completed'>('pending');
+  const [bookingStatus, setBookingStatus] = useState<'anfrage' | 'pending' | 'confirmed' | 'cancelled' | 'completed'>('anfrage');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize form from booking if editing
   useEffect(() => {
-    if (booking) {
+    if (booking && equipment.length > 0) {
       const meta = booking.meta || {};
       setRentalStart(meta._rental_start || '');
       setRentalEnd(meta._rental_end || '');
@@ -46,17 +46,59 @@ export default function RentalBookingForm({
       setCustomerEmail(meta._customer_email || '');
       setCustomerPhone(meta._customer_phone || '');
       setCustomerMessage(meta._customer_message || '');
-      setBookingStatus(meta._booking_status || 'pending');
+      setBookingStatus(meta._booking_status || 'anfrage');
 
       // Handle equipment selection
       if (meta._booking_type === 'multi' && meta._cart_data) {
         try {
           const cartData = JSON.parse(meta._cart_data);
-          const selections: EquipmentSelection[] = cartData.map((item: any) => ({
-            id: item.equipmentId,
-            title: item.title || `Equipment ${item.equipmentId}`,
-            quantity: item.quantity || 1,
-          }));
+          const selections: EquipmentSelection[] = cartData.map((item: any) => {
+            // Get equipment ID - handle both equipmentId and id fields
+            const rawId = item.equipmentId || item.id;
+            
+            // Validate and convert ID
+            if (rawId === null || rawId === undefined || rawId === '') {
+              console.error('Missing equipment ID in cart item:', item);
+              return null;
+            }
+            
+            const equipmentId = typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10);
+            
+            if (isNaN(equipmentId) || equipmentId <= 0) {
+              console.error('Invalid equipment ID:', rawId, item);
+              return null;
+            }
+            
+            // Use saved title first (it should be there from when booking was created)
+            let title = item.title;
+            
+            // Try to find equipment in the array to verify or get better title
+            const eq = equipment.find((e) => e.id === equipmentId);
+            if (eq) {
+              // If we found the equipment and title is missing or generic, get better title
+              if (!title || title.trim() === '' || title === `Equipment ${equipmentId}`) {
+                title = typeof eq.title === 'string' ? eq.title : eq.title?.rendered || '';
+                // If still no title, try to build from brand/model
+                if (!title || title.trim() === '') {
+                  const brand = eq.meta?._equipment_brand || '';
+                  const model = eq.meta?._equipment_model || '';
+                  title = `${brand} ${model}`.trim();
+                }
+              }
+            }
+            
+            // Final fallback if still no title
+            if (!title || title.trim() === '') {
+              title = `Equipment ${equipmentId}`;
+            }
+            
+            return {
+              id: equipmentId,
+              title: title.trim(),
+              quantity: item.quantity || 1,
+            };
+          }).filter((s: EquipmentSelection | null): s is EquipmentSelection => s !== null && s.id > 0);
+          
           setEquipmentSelections(selections);
           setSelectedEquipmentIds(selections.map((s) => s.id));
         } catch (e) {
@@ -64,34 +106,100 @@ export default function RentalBookingForm({
         }
       } else if (meta._equipment_id) {
         // Single booking
-        const eq = equipment.find((e) => e.id === meta._equipment_id);
+        const equipmentId = Number(meta._equipment_id);
+        const eq = equipment.find((e) => e.id === equipmentId);
         if (eq) {
-          const title = typeof eq.title === 'string' ? eq.title : eq.title?.rendered || `Equipment ${eq.id}`;
+          let title = typeof eq.title === 'string' ? eq.title : eq.title?.rendered || '';
+          if (!title) {
+            const brand = eq.meta?._equipment_brand || '';
+            const model = eq.meta?._equipment_model || '';
+            title = `${brand} ${model}`.trim() || `Equipment ${equipmentId}`;
+          }
           setEquipmentSelections([{
-            id: meta._equipment_id,
+            id: equipmentId,
             title,
             quantity: meta._quantity || 1,
           }]);
-          setSelectedEquipmentIds([meta._equipment_id]);
+          setSelectedEquipmentIds([equipmentId]);
         }
       }
     }
   }, [booking, equipment]);
 
-  // Update equipment selections when selected IDs change
+  // Update equipment selections when selected IDs change (but not during initial load)
   useEffect(() => {
-    const newSelections: EquipmentSelection[] = selectedEquipmentIds.map((id) => {
-      const existing = equipmentSelections.find((s) => s.id === id);
-      if (existing) return existing;
+    // Skip if we're initializing from a booking (equipmentSelections already set by first useEffect)
+    // Only run this effect when user manually changes selections
+    if (booking && equipmentSelections.length > 0) {
+      // Check if this is the initial load by comparing with what we expect from the booking
+      const meta = booking.meta || {};
+      if (meta._booking_type === 'multi' && meta._cart_data) {
+        try {
+          const cartData = JSON.parse(meta._cart_data);
+          const expectedIds = cartData
+            .map((item: any) => Number(item.equipmentId || item.id))
+            .filter((id: number) => !isNaN(id) && id > 0);
+          
+          // If selectedEquipmentIds matches expected IDs, this is initial load - skip
+          const currentIds = selectedEquipmentIds.map(id => Number(id)).sort();
+          const expectedIdsSorted = expectedIds.sort();
+          if (currentIds.length === expectedIdsSorted.length && 
+              currentIds.every((id, idx) => id === expectedIdsSorted[idx])) {
+            return; // This is initial load, skip
+          }
+        } catch (e) {
+          // If parsing fails, continue with the effect
+        }
+      } else if (meta._equipment_id) {
+        const expectedId = Number(meta._equipment_id);
+        if (selectedEquipmentIds.length === 1 && Number(selectedEquipmentIds[0]) === expectedId) {
+          return; // This is initial load, skip
+        }
+      }
+    }
 
-      const eq = equipment.find((e) => e.id === id);
-      const title = eq ? (typeof eq.title === 'string' ? eq.title : eq.title?.rendered || `Equipment ${id}`) : `Equipment ${id}`;
-      return { id, title, quantity: 1 };
+    // Only update if we have selected IDs and they don't match current selections
+    if (selectedEquipmentIds.length === 0) {
+      return;
+    }
+
+    const newSelections: EquipmentSelection[] = selectedEquipmentIds.map((id) => {
+      const existing = equipmentSelections.find((s) => Number(s.id) === Number(id));
+      if (existing) {
+        // Preserve quantity from existing selection
+        return existing;
+      }
+
+      // Look up equipment from array
+      const eq = equipment.find((e) => e.id === Number(id));
+      let title = '';
+      
+      if (eq) {
+        title = typeof eq.title === 'string' ? eq.title : eq.title?.rendered || '';
+        // If no title, try to build from brand/model
+        if (!title) {
+          const brand = eq.meta?._equipment_brand || '';
+          const model = eq.meta?._equipment_model || '';
+          title = `${brand} ${model}`.trim() || `Equipment ${id}`;
+        }
+      }
+      
+      // Fallback if equipment not found
+      if (!title) {
+        title = `Equipment ${id}`;
+      }
+      
+      return { id: Number(id), title, quantity: 1 };
     });
 
-    // Remove selections that are no longer selected
-    setEquipmentSelections(newSelections);
-  }, [selectedEquipmentIds, equipment]);
+    // Remove selections that are no longer selected, but preserve quantities
+    const updatedSelections = newSelections.map((newSel) => {
+      const existing = equipmentSelections.find((s) => Number(s.id) === Number(newSel.id));
+      return existing ? { ...newSel, quantity: existing.quantity } : newSel;
+    });
+
+    setEquipmentSelections(updatedSelections);
+  }, [selectedEquipmentIds, equipment, booking, equipmentSelections]);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -143,7 +251,8 @@ export default function RentalBookingForm({
 
     try {
       const equipmentData = equipmentSelections.map((s) => ({
-        id: s.id,
+        equipmentId: s.id,
+        id: s.id, // Also include id for backward compatibility
         title: s.title,
         quantity: s.quantity,
       }));
@@ -173,10 +282,67 @@ export default function RentalBookingForm({
     );
   };
 
-  const equipmentOptions = equipment.map((eq) => ({
-    id: eq.id,
-    name: typeof eq.title === 'string' ? eq.title : eq.title?.rendered || `Equipment ${eq.id}`,
-  }));
+  // Calculate price for a single equipment item
+  const calculateEquipmentPrice = (equipmentId: number, quantity: number, startDate: string, endDate: string): number => {
+    if (!startDate || !endDate || quantity <= 0) {
+      return 0;
+    }
+
+    const eq = equipment.find((e) => e.id === equipmentId);
+    if (!eq) return 0;
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    
+    const dailyRate = eq.meta?._tagesmiete || 0;
+    const weekendRate = eq.meta?._wochenendmiete || 0;
+    const weeklyRate = eq.meta?._wochenmiete || 0;
+    const monthlyRate = eq.meta?._monatsmiete || 0;
+    
+    let rentalPrice = 0;
+    
+    // Determine best pricing
+    if (days >= 28 && monthlyRate > 0) {
+      const months = Math.ceil(days / 28);
+      rentalPrice = monthlyRate * months * quantity;
+    } else if (days >= 7 && weeklyRate > 0) {
+      const weeks = Math.ceil(days / 7);
+      rentalPrice = weeklyRate * weeks * quantity;
+    } else if (days >= 2 && days <= 3 && weekendRate > 0) {
+      rentalPrice = weekendRate * quantity;
+    } else {
+      rentalPrice = dailyRate * days * quantity;
+    }
+    
+    return rentalPrice;
+  };
+
+  // Calculate total price for all selected equipment
+  const totalPrice = equipmentSelections.reduce((sum, selection) => {
+    return sum + calculateEquipmentPrice(selection.id, selection.quantity, rentalStart, rentalEnd);
+  }, 0);
+
+  const formatPrice = (price: number): string => {
+    return new Intl.NumberFormat('de-DE', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(price);
+  };
+
+  const equipmentOptions = equipment.map((eq) => {
+    let name = typeof eq.title === 'string' ? eq.title : eq.title?.rendered || '';
+    // If no title, try to build from brand/model
+    if (!name) {
+      const brand = eq.meta?._equipment_brand || '';
+      const model = eq.meta?._equipment_model || '';
+      name = `${brand} ${model}`.trim() || `Equipment ${eq.id}`;
+    }
+    return {
+      id: eq.id,
+      name,
+    };
+  });
 
   return (
     <form onSubmit={handleSubmit} className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-6 space-y-6">
@@ -208,24 +374,52 @@ export default function RentalBookingForm({
             Mengen
           </label>
           <div className="space-y-3">
-            {equipmentSelections.map((selection) => (
-              <div key={selection.id} className="flex items-center gap-3">
-                <span className="flex-1 text-[var(--color-text-primary)]">{selection.title}</span>
-                <div className="w-24">
-                  <input
-                    type="number"
-                    min="1"
-                    value={selection.quantity}
-                    onChange={(e) => updateQuantity(selection.id, parseInt(e.target.value) || 1)}
-                    className="w-full px-3 py-2 bg-[var(--color-surface-light)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                  />
-                  {errors[`quantity_${selection.id}`] && (
-                    <p className="mt-1 text-xs text-red-500">{errors[`quantity_${selection.id}`]}</p>
+            {equipmentSelections.map((selection) => {
+              const itemPrice = calculateEquipmentPrice(selection.id, selection.quantity, rentalStart, rentalEnd);
+              return (
+                <div key={selection.id} className="flex items-center gap-3">
+                  <span className="flex-1 text-[var(--color-text-primary)]">{selection.title}</span>
+                  <div className="w-24">
+                    <input
+                      type="number"
+                      min="1"
+                      value={selection.quantity}
+                      onChange={(e) => updateQuantity(selection.id, parseInt(e.target.value) || 1)}
+                      className="w-full px-3 py-2 bg-[var(--color-surface-light)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    />
+                    {errors[`quantity_${selection.id}`] && (
+                      <p className="mt-1 text-xs text-red-500">{errors[`quantity_${selection.id}`]}</p>
+                    )}
+                  </div>
+                  {rentalStart && rentalEnd && (
+                    <div className="w-32 text-right">
+                      <div className="text-sm font-medium text-[var(--color-text-primary)]">
+                        {formatPrice(itemPrice)}
+                      </div>
+                      <div className="text-xs text-[var(--color-text-secondary)]">
+                        {selection.quantity}x
+                      </div>
+                    </div>
                   )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
+          {rentalStart && rentalEnd && totalPrice > 0 && (
+            <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-[var(--color-text-primary)]">
+                  Gesamtpreis (Miete):
+                </span>
+                <span className="text-lg font-bold text-[var(--color-text-primary)]">
+                  {formatPrice(totalPrice)}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-[var(--color-text-secondary)] italic">
+                Hinweis: Eine angemessene Kaution wird dem finalen Angebot hinzugefügt.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -295,6 +489,7 @@ export default function RentalBookingForm({
         value={bookingStatus}
         onChange={(value) => setBookingStatus(value as any)}
         options={[
+          { value: 'anfrage', label: 'Anfrage' },
           { value: 'pending', label: 'Ausstehend' },
           { value: 'confirmed', label: 'Bestätigt' },
           { value: 'cancelled', label: 'Storniert' },

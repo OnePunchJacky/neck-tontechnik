@@ -98,6 +98,7 @@ export default function RentalBookingsPage() {
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; className: string }> = {
+      anfrage: { label: 'Anfrage', className: 'bg-yellow-500/20 text-yellow-500' },
       pending: { label: 'Ausstehend', className: 'bg-yellow-500/20 text-yellow-500' },
       confirmed: { label: 'Bestätigt', className: 'bg-green-500/20 text-green-500' },
       cancelled: { label: 'Storniert', className: 'bg-red-500/20 text-red-500' },
@@ -165,7 +166,7 @@ export default function RentalBookingsPage() {
     {
       key: 'status',
       label: 'Status',
-      render: (booking: WPRentalBooking) => getStatusBadge(booking.meta?._booking_status || 'pending'),
+      render: (booking: WPRentalBooking) => getStatusBadge(booking.meta?._booking_status || 'anfrage'),
     },
     {
       key: 'date',

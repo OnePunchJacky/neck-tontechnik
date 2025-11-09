@@ -30,13 +30,20 @@ export default function SearchableMultiSelect({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Normalize IDs for consistent comparison (handles number/string mismatches)
+  const normalizeId = (id: number | string): number => typeof id === 'number' ? id : parseInt(String(id), 10);
+
   // Filter options based on search term
   const filteredOptions = options.filter((option) =>
     option.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Get selected options for display
-  const selectedOptions = options.filter((option) => selectedIds.includes(option.id));
+  // Get selected options for display - normalize IDs for comparison
+  const normalizedSelectedIds = selectedIds.map(normalizeId);
+  const selectedOptions = options.filter((option) => {
+    const normalizedOptionId = normalizeId(option.id);
+    return normalizedSelectedIds.includes(normalizedOptionId);
+  });
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -52,10 +59,13 @@ export default function SearchableMultiSelect({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
+  
   const handleToggle = (optionId: number | string) => {
-    if (selectedIds.includes(optionId)) {
-      onChange(selectedIds.filter((id) => id !== optionId));
+    const normalizedOptionId = normalizeId(optionId);
+    const normalizedSelectedIds = selectedIds.map(normalizeId);
+    
+    if (normalizedSelectedIds.includes(normalizedOptionId)) {
+      onChange(selectedIds.filter((id) => normalizeId(id) !== normalizedOptionId));
     } else {
       onChange([...selectedIds, optionId]);
     }
@@ -63,7 +73,8 @@ export default function SearchableMultiSelect({
 
   const handleRemove = (optionId: number | string, e: React.MouseEvent) => {
     e.stopPropagation();
-    onChange(selectedIds.filter((id) => id !== optionId));
+    const normalizedOptionId = normalizeId(optionId);
+    onChange(selectedIds.filter((id) => normalizeId(id) !== normalizedOptionId));
   };
 
   return (
@@ -136,7 +147,8 @@ export default function SearchableMultiSelect({
           <div className="max-h-48 overflow-y-auto">
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option) => {
-                const isSelected = selectedIds.includes(option.id);
+                const normalizedOptionId = normalizeId(option.id);
+                const isSelected = normalizedSelectedIds.includes(normalizedOptionId);
                 return (
                   <div
                     key={option.id}
