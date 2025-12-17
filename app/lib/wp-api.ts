@@ -293,20 +293,20 @@ export class WordPressAPI {
   async getSettingsPost() {
     try {
       // Try to find existing settings post by slug
-      const posts = await this.getPosts('post', { slug: 'homepage-settings', per_page: 1 });
+      const posts = await this.getPosts('posts', { slug: 'homepage-settings', per_page: 1 });
       if (posts && Array.isArray(posts) && posts.length > 0) {
         return posts[0];
       }
       
       // If not found, try to find by title
-      const allPosts = await this.getPosts('post', { search: 'Homepage Settings', per_page: 10 });
+      const allPosts = await this.getPosts('posts', { search: 'Homepage Settings', per_page: 10 });
       const settingsPost = allPosts.find((p: any) => p.title?.rendered === 'Homepage Settings' || p.slug === 'homepage-settings');
       if (settingsPost) {
         return settingsPost;
       }
       
       // Create settings post if it doesn't exist
-      const newPost = await this.createPost('post', {
+      const newPost = await this.createPost('posts', {
         title: 'Homepage Settings',
         slug: 'homepage-settings',
         status: 'private',
@@ -323,11 +323,11 @@ export class WordPressAPI {
   // Store option as meta on settings post
   async setOptionViaMeta(optionName: string, value: any) {
     const settingsPost = await this.getSettingsPost();
-    const currentPost = await this.getPost('post', settingsPost.id);
+    const currentPost = await this.getPost('posts', settingsPost.id);
     const existingMeta = currentPost.meta || {};
     
     // Merge with existing meta to preserve other options
-    await this.updatePost('post', settingsPost.id, {
+    await this.updatePost('posts', settingsPost.id, {
       meta: {
         ...existingMeta,
         [optionName]: value,
@@ -340,7 +340,7 @@ export class WordPressAPI {
   async getOptionViaMeta(optionName: string) {
     try {
       const settingsPost = await this.getSettingsPost();
-      const post = await this.getPost('post', settingsPost.id);
+      const post = await this.getPost('posts', settingsPost.id);
       return post.meta?.[optionName] || null;
     } catch (error) {
       console.error('Error getting option from meta:', error);
