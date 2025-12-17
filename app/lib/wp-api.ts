@@ -124,8 +124,41 @@ export class WordPressAPI {
   }
 
   async createPost(postType: string, data: Record<string, any>) {
-    const response = await this.client.post(`/${postType}`, data);
-    return response.data;
+    try {
+      const response = await this.client.post(`/${postType}`, data);
+      return response.data;
+    } catch (error: any) {
+      // Provide more detailed error information
+      if (error.response) {
+        const status = error.response.status;
+        const errorData = error.response.data || {};
+        const errorMessage = errorData?.message || 
+                           errorData?.error || 
+                           (typeof errorData === 'string' ? errorData : null) ||
+                           `HTTP ${status}`;
+        
+        // Log full error details for debugging
+        console.error(`Error creating ${postType}:`, {
+          status,
+          message: errorMessage,
+          data: errorData,
+          fullError: error,
+        });
+        
+        // Check for authentication errors
+        if (status === 401 || status === 403) {
+          throw new Error(`Authentication required to create ${postType}`);
+        }
+        
+        throw new Error(`Failed to create ${postType}: ${errorMessage} (Status: ${status})`);
+      } else if (error.request) {
+        console.error(`Error creating ${postType}: No response received`, error.request);
+        throw new Error(`Failed to create ${postType}: No response from server`);
+      } else {
+        console.error(`Error creating ${postType}:`, error.message || error);
+        throw new Error(`Failed to create ${postType}: ${error.message || 'Unknown error'}`);
+      }
+    }
   }
 
   async updatePost(postType: string, id: number, data: Record<string, any>, retries = 2) {
@@ -293,57 +326,154 @@ export class WordPressAPI {
   async getSettingsPost() {
     try {
       // Try to find existing settings post by slug
-      const posts = await this.getPosts('posts', { slug: 'homepage-settings', per_page: 1 });
-      if (posts && Array.isArray(posts) && posts.length > 0) {
-        return posts[0];
+      // Try both old and new slug for backwards compatibility
+      const possibleSlugs = ['homepage-settings-internal', 'homepage-settings'];
+      for (const slug of possibleSlugs) {
+        try {
+          const posts = await this.getPosts('posts', { slug, per_page: 1 });
+          if (posts && Array.isArray(posts) && posts.length > 0) {
+            return posts[0];
+          }
+        } catch (slugError: any) {
+          // Continue to next slug
+        }
       }
       
       // If not found, try to find by title
-      const allPosts = await this.getPosts('posts', { search: 'Homepage Settings', per_page: 10 });
-      const settingsPost = allPosts.find((p: any) => p.title?.rendered === 'Homepage Settings' || p.slug === 'homepage-settings');
-      if (settingsPost) {
-        return settingsPost;
+      try {
+        const allPosts = await this.getPosts('posts', { search: 'Homepage Settings', per_page: 10 });
+        const settingsPost = allPosts.find((p: any) => 
+          p.title?.rendered === 'Homepage Settings' || 
+          p.slug === 'homepage-settings' || 
+          p.slug === 'homepage-settings-internal'
+        );
+        if (settingsPost) {
+          return settingsPost;
+        }
+      } catch (searchError: any) {
+        // Continue to create new post
+      }
+      
+      // Only try to create if we have authentication
+      if (!this.authToken) {
+        // Return null instead of throwing - allows graceful fallback
+        return null;
       }
       
       // Create settings post if it doesn't exist
+      // Use 'publish' status so it can be read without auth, but use a special slug
+      // that won't be accessed publicly
       const newPost = await this.createPost('posts', {
         title: 'Homepage Settings',
-        slug: 'homepage-settings',
-        status: 'private',
+        slug: 'homepage-settings-internal',
+        status: 'publish', // Publish so it can be read without auth
         content: 'Internal settings post for homepage configuration',
       });
       return newPost;
     } catch (error: any) {
       console.error('Error getting settings post:', error);
-      // If we can't create/get the post, throw a more descriptive error
-      throw new Error(`Failed to get or create settings post: ${error.message}`);
+      // Return null on error to allow fallback, unless it's a critical error that should propagate
+      // Only throw if we have auth and it's a real error (not just missing post)
+      if (this.authToken && !error.message?.includes('Authentication required')) {
+        throw new Error(`Failed to get or create settings post: ${error.message}`);
+      }
+      return null;
     }
   }
 
   // Store option as meta on settings post
   async setOptionViaMeta(optionName: string, value: any) {
-    const settingsPost = await this.getSettingsPost();
-    const currentPost = await this.getPost('posts', settingsPost.id);
-    const existingMeta = currentPost.meta || {};
-    
-    // Merge with existing meta to preserve other options
-    await this.updatePost('posts', settingsPost.id, {
-      meta: {
-        ...existingMeta,
-        [optionName]: value,
-      },
-    });
-    return value;
+    try {
+      const settingsPost = await this.getSettingsPost();
+      if (!settingsPost || !settingsPost.id) {
+        throw new Error('Settings post not found and could not be created. Authentication may be required.');
+      }
+      const currentPost = await this.getPost('posts', settingsPost.id);
+      const existingMeta = currentPost.meta || {};
+      
+      // WordPress REST API requires string type for meta fields
+      // So we need to JSON encode arrays/objects before sending
+      let metaValue: any;
+      if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
+        metaValue = JSON.stringify(value);
+      } else {
+        metaValue = value;
+      }
+      
+      // Ensure the post is published so it can be read without auth
+      // Update status and slug if needed
+      const updatePayload: any = {
+        meta: {
+          ...existingMeta,
+          [optionName]: metaValue,
+        },
+      };
+      
+      // If post is private, update it to published so GET requests can read it
+      // Also update slug to the new format
+      if (currentPost.status === 'private' || currentPost.slug === 'homepage-settings') {
+        updatePayload.status = 'publish';
+        updatePayload.slug = 'homepage-settings-internal';
+      }
+      
+      // Merge with existing meta to preserve other options
+      await this.updatePost('posts', settingsPost.id, updatePayload);
+      return value;
+    } catch (error: any) {
+      console.error(`Error in setOptionViaMeta for ${optionName}:`, {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        stack: error.stack,
+      });
+      throw error;
+    }
   }
 
   // Get option from meta on settings post
   async getOptionViaMeta(optionName: string) {
     try {
       const settingsPost = await this.getSettingsPost();
+      if (!settingsPost || !settingsPost.id) {
+        return null;
+      }
       const post = await this.getPost('posts', settingsPost.id);
-      return post.meta?.[optionName] || null;
-    } catch (error) {
-      console.error('Error getting option from meta:', error);
+      const rawValue = post.meta?.[optionName];
+      
+      if (!rawValue) {
+        return null;
+      }
+      
+      // WordPress might return the value in different formats:
+      // 1. As a JSON string (if stored as JSON)
+      // 2. Already unserialized as array/object (WordPress automatic unserialization)
+      // 3. As a plain string
+      
+      // If it's already an array/object, WordPress has already unserialized it
+      if (Array.isArray(rawValue) || (typeof rawValue === 'object' && rawValue !== null && !(rawValue instanceof Date))) {
+        return rawValue;
+      }
+      
+      // If it's a string, try to parse as JSON
+      if (typeof rawValue === 'string') {
+        // Check if it looks like JSON (starts with [ or {)
+        if ((rawValue.trim().startsWith('[') || rawValue.trim().startsWith('{'))) {
+          try {
+            const parsed = JSON.parse(rawValue);
+            return parsed;
+          } catch (e) {
+            return rawValue;
+          }
+        } else {
+          // Doesn't look like JSON, return as string
+          return rawValue;
+        }
+      }
+      
+      return rawValue;
+    } catch (error: any) {
+      // Silently fail if we can't get the option (e.g., no auth, post doesn't exist)
+      // This allows fallback to file system
       return null;
     }
   }

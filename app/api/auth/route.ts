@@ -128,8 +128,14 @@ export async function GET(request: NextRequest) {
       authenticated: true,
       user: session.user,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Session check error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
+    // Return unauthenticated instead of 500 to prevent breaking the UI
     return NextResponse.json({ authenticated: false }, { status: 200 });
   }
 }

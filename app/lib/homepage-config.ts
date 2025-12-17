@@ -3,6 +3,7 @@
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import testimonialsData from '../../data/testimonials.json';
+import { WordPressAPI } from './wp-api';
 
 const HOMEPAGE_CONFIG_FILE = join(process.cwd(), 'data', 'homepage-config.json');
 const LOGOS_FILE = join(process.cwd(), 'data', 'homepage-logos.json');
@@ -49,9 +50,31 @@ export async function getHomepageConfig() {
 
 export async function getHomepageLogos() {
   try {
-    const fileContent = await readFile(LOGOS_FILE, 'utf-8');
-    return JSON.parse(fileContent);
+    // Try WordPress first (production)
+    try {
+      const wpApi = new WordPressAPI();
+      const logos = await wpApi.getOptionViaMeta('homepage_logos');
+      
+      // Return WordPress logos if they exist (even if empty array)
+      // Only fall back if logos is null/undefined
+      if (logos !== null && logos !== undefined) {
+        if (Array.isArray(logos)) {
+          return logos;
+        }
+      }
+    } catch (wpError: any) {
+      // Fallback to file system for local development
+    }
+    
+    // Fallback to file system
+    try {
+      const fileContent = await readFile(LOGOS_FILE, 'utf-8');
+      return JSON.parse(fileContent);
+    } catch (error) {
+      return defaultLogos;
+    }
   } catch (error) {
+    console.error('Error reading logos:', error);
     return defaultLogos;
   }
 }

@@ -3,6 +3,7 @@ import { requireAuth } from '@/app/lib/auth';
 import { WordPressAPI } from '@/app/lib/wp-api';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
+import { revalidatePath } from 'next/cache';
 
 const LOGOS_FILE = join(process.cwd(), 'data', 'homepage-logos.json');
 
@@ -30,12 +31,15 @@ export async function GET() {
     try {
       const wpApi = new WordPressAPI();
       const logos = await wpApi.getOptionViaMeta('homepage_logos');
-      if (logos && Array.isArray(logos) && logos.length > 0) {
-        return NextResponse.json(logos);
+      
+      // Return WordPress logos if they exist (even if empty array)
+      if (logos !== null && logos !== undefined) {
+        if (Array.isArray(logos)) {
+          return NextResponse.json(logos);
+        }
       }
     } catch (wpError: any) {
       // Fallback to file system for local development
-      console.log('WordPress not available, using file system fallback');
     }
     
     // Fallback to file system
@@ -63,14 +67,27 @@ export async function PUT(request: NextRequest) {
     // Store in WordPress
     await wpApi.setOptionViaMeta('homepage_logos', body);
     
+    // Revalidate homepage to clear cache
+    revalidatePath('/');
+    
     return NextResponse.json(body);
   } catch (error: any) {
     if (error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     console.error('Error updating logos:', error);
+    console.error('Error details:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      stack: error.stack,
+    });
     return NextResponse.json(
-      { error: error.message || 'Failed to update logos' },
+      { 
+        error: error.message || 'Failed to update logos',
+        details: error.response?.data || error.message,
+        status: error.response?.status,
+      },
       { status: 500 }
     );
   }

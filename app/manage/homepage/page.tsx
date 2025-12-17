@@ -308,10 +308,16 @@ export default function HomepagePage() {
       });
 
       if (response.ok) {
+        const savedLogos = await response.json();
+        // Update state immediately with saved data
+        setLogos(Array.isArray(savedLogos) ? savedLogos : []);
         setShowLogoForm(false);
         setEditingLogoIndex(null);
         setLogoForm({ src: '', alt: '' });
-        fetchData();
+        // Also refresh all data to ensure consistency
+        setTimeout(() => {
+          fetchData();
+        }, 500);
       } else {
         const error = await response.json();
         alert(error.error || 'Fehler beim Speichern');
