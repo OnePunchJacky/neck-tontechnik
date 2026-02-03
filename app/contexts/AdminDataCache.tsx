@@ -57,7 +57,7 @@ export function AdminDataCacheProvider({ children }: { children: ReactNode }) {
   const fetchRecordings = async () => {
     setLoading(prev => ({ ...prev, recordings: true }));
     try {
-      const response = await fetch('/api/wp/recordings?per_page=100');
+      const response = await fetch('/api/wp/recordings?per_page=100&status=any');
       if (response.ok) {
         const data = await response.json();
         setRecordings(Array.isArray(data) ? data : []);
@@ -72,7 +72,7 @@ export function AdminDataCacheProvider({ children }: { children: ReactNode }) {
   const fetchLiveReferences = async () => {
     setLoading(prev => ({ ...prev, liveReferences: true }));
     try {
-      const response = await fetch('/api/wp/live-references?per_page=100');
+      const response = await fetch('/api/wp/live-references?per_page=100&status=any');
       if (response.ok) {
         const data = await response.json();
         setLiveReferences(Array.isArray(data) ? data : []);
@@ -87,7 +87,7 @@ export function AdminDataCacheProvider({ children }: { children: ReactNode }) {
   const fetchAudioSamples = async () => {
     setLoading(prev => ({ ...prev, audioSamples: true }));
     try {
-      const response = await fetch('/api/wp/audio-samples?per_page=100');
+      const response = await fetch('/api/wp/audio-samples?per_page=100&status=any');
       if (response.ok) {
         const data = await response.json();
         setAudioSamples(Array.isArray(data) ? data : []);
@@ -102,7 +102,7 @@ export function AdminDataCacheProvider({ children }: { children: ReactNode }) {
   const fetchEquipment = async () => {
     setLoading(prev => ({ ...prev, equipment: true }));
     try {
-      const response = await fetch('/api/wp/equipment?per_page=100');
+      const response = await fetch('/api/wp/equipment?per_page=100&status=any');
       if (response.ok) {
         const data = await response.json();
         setEquipment(Array.isArray(data) ? data : []);
@@ -117,7 +117,7 @@ export function AdminDataCacheProvider({ children }: { children: ReactNode }) {
   const fetchArtists = async () => {
     setLoading(prev => ({ ...prev, artists: true }));
     try {
-      const response = await fetch('/api/wp/artists?per_page=100');
+      const response = await fetch('/api/wp/artists?per_page=100&status=any');
       if (response.ok) {
         const data = await response.json();
         setArtists(Array.isArray(data) ? data : []);
