@@ -119,15 +119,20 @@ async function getLiveReferences(): Promise<(WPLiveReference & { featuredImage?:
 
 function getCategoryColor(categoryName: string): string {
   const colorMap: { [key: string]: string } = {
-    'Concert': 'bg-purple-100 text-purple-800',
-    'Corporate': 'bg-blue-100 text-blue-800',
-    'Festival': 'bg-green-100 text-green-800',
+    // ACF Categories (primary)
+    'Front Of House': 'bg-blue-100 text-blue-800',
+    'Stagetech': 'bg-purple-100 text-purple-800',
+    'Monitor': 'bg-green-100 text-green-800',
+    // WordPress Categories (legacy)
+    'Concert': 'bg-violet-100 text-violet-800',
+    'Corporate': 'bg-cyan-100 text-cyan-800',
+    'Festival': 'bg-emerald-100 text-emerald-800',
     'Theatre': 'bg-red-100 text-red-800',
     'Church': 'bg-orange-100 text-orange-800',
     'Club': 'bg-pink-100 text-pink-800',
     'Conference': 'bg-indigo-100 text-indigo-800',
   };
-  return colorMap[categoryName] || 'bg-[var(--color-surface-light)] text-[var(--color-text-primary)]';
+  return colorMap[categoryName] || 'bg-gray-100 text-gray-800';
 }
 
 function stripHtml(html: string): string {
@@ -337,13 +342,13 @@ export default function LiveReferencesPage() {
                       {/* ACF Categories */}
                       {reference.acf?.category && (
                         <div className="flex flex-wrap gap-2 mb-3">
-                          {(Array.isArray(reference.acf.category) 
-                            ? reference.acf.category 
+                          {(Array.isArray(reference.acf.category)
+                            ? reference.acf.category
                             : [reference.acf.category]
                           ).map((category, index) => (
                             <span
                               key={index}
-                              className="text-xs font-medium px-2.5 py-0.5 rounded bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20"
+                              className={`text-xs font-medium px-2.5 py-0.5 rounded ${getCategoryColor(category)}`}
                             >
                               {category}
                             </span>
