@@ -13,6 +13,7 @@ interface WPRecording {
   slug: string;
   link: string;
   categories: number[];
+  menu_order?: number;
   acf?: {
     cover?: number | string; // Can be media ID (number) or external URL (string)
     spotify?: string;

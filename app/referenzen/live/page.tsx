@@ -11,6 +11,7 @@ interface WPLiveReference {
   date: string;
   slug: string;
   categories: number[];
+  menu_order?: number;
   acf?: {
     location?: string;
     bild?: number | string;
