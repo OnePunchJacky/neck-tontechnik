@@ -58,7 +58,7 @@ function register_live_references_post_type()
     $args = array(
         'label'                 => __('Live Reference', 'text_domain'),
         'labels'                => $labels,
-        'supports'              => array('title', 'editor', 'custom-fields'),
+        'supports'              => array('title', 'editor', 'custom-fields', 'page-attributes'),
         'hierarchical'          => false,
         'public'                => true,
         'show_ui'               => true,
@@ -122,7 +122,7 @@ function register_recordings_post_type()
     $args = array(
         'label'                 => __('Recording', 'text_domain'),
         'labels'                => $labels,
-        'supports'              => array('title', 'editor', 'custom-fields'),
+        'supports'              => array('title', 'editor', 'custom-fields', 'page-attributes'),
         'hierarchical'          => false,
         'public'                => true,
         'show_ui'               => true,

@@ -99,8 +99,23 @@ async function getLiveReferences(): Promise<(WPLiveReference & { featuredImage?:
       })
     );
     
-    // Sort by year if available, otherwise by post date (newest first)
+    // Sort by menu_order first (ascending), then by year/date for items with no order
     return referencesWithImages.sort((a, b) => {
+      const orderA = a.menu_order || 0;
+      const orderB = b.menu_order || 0;
+
+      // If both have menu_order set (> 0), sort by menu_order ascending
+      if (orderA > 0 && orderB > 0) {
+        return orderA - orderB;
+      }
+
+      // If only A has menu_order, A comes first
+      if (orderA > 0) return -1;
+
+      // If only B has menu_order, B comes first
+      if (orderB > 0) return 1;
+
+      // Neither has menu_order, fall back to year/date sorting
       const yearA = a.acf?.year ? parseInt(a.acf.year) : null;
       const yearB = b.acf?.year ? parseInt(b.acf.year) : null;
       if (yearA && yearB) {

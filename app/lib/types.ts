@@ -74,6 +74,7 @@ export interface WPLiveReference {
   meta: Record<string, any>;
   categories: number[];
   tags: number[];
+  menu_order?: number;
   acf?: {
     location?: string;
     bild?: number | string;
@@ -108,6 +109,7 @@ export interface WPRecording {
   meta: Record<string, any>;
   categories: number[];
   tags: number[];
+  menu_order?: number;
   acf?: {
     cover?: number | string;
     spotify?: string;

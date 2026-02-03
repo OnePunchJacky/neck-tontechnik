@@ -119,10 +119,25 @@ async function getRecordings(): Promise<(WPRecording & { coverImage?: WPMedia })
       })
     );
     
-    // Sort by date (newest first)
-    return recordingsWithCovers.sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    // Sort by menu_order first (ascending), then by date (newest first) for items with no order
+    return recordingsWithCovers.sort((a, b) => {
+      const orderA = a.menu_order || 0;
+      const orderB = b.menu_order || 0;
+
+      // If both have menu_order set (> 0), sort by menu_order ascending
+      if (orderA > 0 && orderB > 0) {
+        return orderA - orderB;
+      }
+
+      // If only A has menu_order, A comes first
+      if (orderA > 0) return -1;
+
+      // If only B has menu_order, B comes first
+      if (orderB > 0) return 1;
+
+      // Neither has menu_order, sort by date (newest first)
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
   } catch (error) {
     console.error('Error fetching recordings:', error);
     return [];

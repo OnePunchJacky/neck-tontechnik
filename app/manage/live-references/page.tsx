@@ -18,6 +18,7 @@ export default function LiveReferencesPage() {
     title: '',
     content: '',
     status: 'publish',
+    menu_order: 0,
   });
   const [acfFields, setAcfFields] = useState({
     location: '',
@@ -63,6 +64,7 @@ export default function LiveReferencesPage() {
       title: decodeHtmlEntities(reference.title.rendered || ''),
       content: decodeHtmlContent(reference.content.rendered || ''),
       status: reference.status,
+      menu_order: reference.menu_order || 0,
     });
     
     // Read ACF fields (location, bild, year, stage, category)
@@ -112,6 +114,7 @@ export default function LiveReferencesPage() {
         title: formData.title,
         content: formData.content,
         status: formData.status,
+        menu_order: formData.menu_order,
       };
 
       // ACF fields: location, bild, year, stage, category
@@ -144,7 +147,7 @@ export default function LiveReferencesPage() {
       if (response.ok) {
         setShowForm(false);
         setEditingId(null);
-        setFormData({ title: '', content: '', status: 'publish' });
+        setFormData({ title: '', content: '', status: 'publish', menu_order: 0 });
         setAcfFields({
           location: '',
           bild: '',
@@ -183,6 +186,11 @@ export default function LiveReferencesPage() {
       key: 'title',
       label: 'Titel',
       render: (ref: WPLiveReference) => ref.title.rendered || 'Kein Titel',
+    },
+    {
+      key: 'menu_order',
+      label: 'Reihenfolge',
+      render: (ref: WPLiveReference) => ref.menu_order || 0,
     },
     {
       key: 'status',
@@ -273,6 +281,14 @@ export default function LiveReferencesPage() {
               { value: 'draft', label: 'Entwurf' },
               { value: 'private', label: 'Privat' },
             ]}
+          />
+
+          <FormField
+            label="Sortier-Reihenfolge (0 = Standard)"
+            name="menu_order"
+            type="number"
+            value={String(formData.menu_order)}
+            onChange={(value) => setFormData({ ...formData, menu_order: parseInt(value) || 0 })}
           />
 
           <div className="mt-6 space-y-4">

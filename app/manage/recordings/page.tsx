@@ -20,6 +20,7 @@ export default function RecordingsPage() {
     content: '',
     status: 'publish',
     categories: [] as number[],
+    menu_order: 0,
   });
   const [availableCategories, setAvailableCategories] = useState<Array<{ id: number; name: string }>>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
@@ -84,6 +85,7 @@ export default function RecordingsPage() {
       content: recording.content.rendered || '',
       status: recording.status,
       categories: categoryIds,
+      menu_order: recording.menu_order || 0,
     });
     
     // Convert artist array to number array
@@ -134,6 +136,7 @@ export default function RecordingsPage() {
         content: formData.content,
         status: formData.status,
         categories: Array.isArray(formData.categories) ? formData.categories.filter((id) => !isNaN(id) && id > 0) : [],
+        menu_order: formData.menu_order,
       };
 
       // ACF fields should be sent in an 'acf' object, not 'meta'
@@ -161,7 +164,7 @@ export default function RecordingsPage() {
       if (response.ok) {
         setShowForm(false);
         setEditingId(null);
-        setFormData({ title: '', content: '', status: 'publish', categories: [] });
+        setFormData({ title: '', content: '', status: 'publish', categories: [], menu_order: 0 });
         setAcfFields({
           cover: '',
           spotify: '',
@@ -201,6 +204,11 @@ export default function RecordingsPage() {
       key: 'title',
       label: 'Titel',
       render: (rec: WPRecording) => rec.title.rendered || 'Kein Titel',
+    },
+    {
+      key: 'menu_order',
+      label: 'Reihenfolge',
+      render: (rec: WPRecording) => rec.menu_order || 0,
     },
     {
       key: 'status',
@@ -298,6 +306,13 @@ export default function RecordingsPage() {
                 onChange={(selectedIds) => setAcfFields({ ...acfFields, artist: selectedIds.map((id) => typeof id === 'number' ? id : parseInt(String(id))).filter((id) => !isNaN(id)) })}
                 placeholder="Artists auswählen..."
                 searchPlaceholder="Artists durchsuchen..."
+              />
+              <FormField
+                label="Sortier-Reihenfolge (0 = Standard)"
+                name="menu_order"
+                type="number"
+                value={String(formData.menu_order)}
+                onChange={(value) => setFormData({ ...formData, menu_order: parseInt(value) || 0 })}
               />
               <FormField
                 label="Spotify URL"
